@@ -20,7 +20,7 @@ class ListItem extends StatelessWidget {
   MaterialSwipeAction get leftAction => ss.settings.materialLeftAction.value;
   MaterialSwipeAction get rightAction => ss.settings.materialRightAction.value;
 
-  Widget slideBackground(Chat chat, bool left) {
+  Widget slideBackground(BuildContext context, Chat chat, bool left) {
     MaterialSwipeAction action;
     if (left) {
       action = leftAction;
@@ -28,8 +28,10 @@ class ListItem extends StatelessWidget {
       action = rightAction;
     }
 
+    final light = ss.settings.skin.value == Skins.Light;
+    final foreground = light ? Theme.of(context).scaffoldBackgroundColor : Colors.white;
     return Container(
-      color: action == MaterialSwipeAction.pin
+      color: light ? Theme.of(context).colorScheme.onSurface : action == MaterialSwipeAction.pin
           ? Colors.yellow[800]
           : action == MaterialSwipeAction.alerts
           ? Colors.purple
@@ -55,7 +57,7 @@ class ListItem extends StatelessWidget {
                   : action == MaterialSwipeAction.mark_read
                   ? (chat.hasUnreadMessage! ? Icons.mark_chat_read : Icons.mark_chat_unread)
                   : (chat.isArchived! ? Icons.unarchive : Icons.archive),
-              color: Colors.white,
+              color: foreground,
             ),
             Text(
               action == MaterialSwipeAction.pin
@@ -67,9 +69,9 @@ class ListItem extends StatelessWidget {
                   : action == MaterialSwipeAction.mark_read
                   ? (chat.hasUnreadMessage! ? ' Mark Read' : ' Mark Unread')
                   : (chat.isArchived! ? ' Unarchive' : ' Archive'),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
+              style: TextStyle(
+                color: foreground,
+                fontWeight: light ? FontWeight.w400 : FontWeight.w700,
               ),
               textAlign: left ? TextAlign.right : TextAlign.left,
             ),
@@ -107,10 +109,10 @@ class ListItem extends StatelessWidget {
         return Dismissible(
           background: (kIsDesktop || kIsWeb)
               ? null
-              : Obx(() => slideBackground(chat, false)),
+              : Obx(() => slideBackground(context, chat, false)),
           secondaryBackground: (kIsDesktop || kIsWeb)
               ? null
-              : Obx(() => slideBackground(chat, true)),
+              : Obx(() => slideBackground(context, chat, true)),
           key: UniqueKey(),
           onDismissed: (direction) {
             MaterialSwipeAction action;

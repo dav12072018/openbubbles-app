@@ -141,8 +141,8 @@ class Settings {
   final Rx<SecurityLevel> securityLevel = Rx<SecurityLevel>(SecurityLevel.locked);
   final RxBool incognitoKeyboard = RxBool(false);
 
-  final Rx<Skins> skin = Skins.iOS.obs;
-  final Rx<ThemeMode> theme = ThemeMode.system.obs;
+  final Rx<Skins> skin = (Platform.isAndroid ? Skins.Light : Skins.iOS).obs;
+  final Rx<ThemeMode> theme = (Platform.isAndroid ? ThemeMode.dark : ThemeMode.system).obs;
   final Rx<SwipeDirection> fullscreenViewerSwipeDir = SwipeDirection.RIGHT.obs;
 
   // Pin settings
@@ -575,8 +575,8 @@ class Settings {
     ss.settings.securityLevel.value =
         map['securityLevel'] != null ? SecurityLevel.values[map['securityLevel']] : SecurityLevel.locked;
     ss.settings.incognitoKeyboard.value = map['incognitoKeyboard'] ?? false;
-    ss.settings.skin.value = map['skin'] != null ? Skins.values[map['skin']] : Skins.iOS;
-    ss.settings.theme.value = map['theme'] != null ? ThemeMode.values[map['theme']] : ThemeMode.system;
+    ss.settings.skin.value = map['skin'] != null ? Skins.values[map['skin']] : (Platform.isAndroid ? Skins.Light : Skins.iOS);
+    ss.settings.theme.value = map['theme'] != null ? ThemeMode.values[map['theme']] : (Platform.isAndroid ? ThemeMode.dark : ThemeMode.system);
     ss.settings.fullscreenViewerSwipeDir.value = map['fullscreenViewerSwipeDir'] != null
         ? SwipeDirection.values[map['fullscreenViewerSwipeDir']]
         : SwipeDirection.RIGHT;
@@ -751,8 +751,8 @@ class Settings {
     s.securityLevel.value =
         map['securityLevel'] != null ? SecurityLevel.values[map['securityLevel']] : SecurityLevel.locked;
     s.incognitoKeyboard.value = map['incognitoKeyboard'] ?? false;
-    s.skin.value = map['skin'] != null ? Skins.values[map['skin']] : Skins.iOS;
-    s.theme.value = map['theme'] != null ? ThemeMode.values[map['theme']] : ThemeMode.system;
+    s.skin.value = map['skin'] != null ? Skins.values[map['skin']] : (Platform.isAndroid ? Skins.Light : Skins.iOS);
+    s.theme.value = map['theme'] != null ? ThemeMode.values[map['theme']] : (Platform.isAndroid ? ThemeMode.dark : ThemeMode.system);
     s.fullscreenViewerSwipeDir.value = map['fullscreenViewerSwipeDir'] != null
         ? SwipeDirection.values[map['fullscreenViewerSwipeDir']]
         : SwipeDirection.RIGHT;

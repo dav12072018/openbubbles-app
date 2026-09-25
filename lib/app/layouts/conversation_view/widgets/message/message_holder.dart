@@ -76,7 +76,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
       && !message.guid!.startsWith("error");
   bool get showSender => !message.isGroupEvent && (!message.sameSender(olderMessage) || (olderMessage?.isGroupEvent ?? false)
       || (olderMessage == null || !message.dateCreated!.isWithin(olderMessage!.dateCreated!, minutes: 30)));
-  bool get showAvatar => chat.isGroup;
+  bool get showAvatar => ss.settings.skin.value != Skins.Light && chat.isGroup;
   bool isEditing(int part) => message.isFromMe! && widget.cvController.editing.firstWhereOrNull((e2) => e2.item1.guid == message.guid! && e2.item2.part == part) != null;
 
   List<MessagePart> messageParts = [];
@@ -236,7 +236,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                           // add previous edits if needed
                           if (e.isEdited)
                             Padding(
-                              padding: showAvatar || ss.settings.alwaysShowAvatars.value
+                              padding: showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)
                                   ? EdgeInsets.only(left: 35.0 * ss.settings.avatarScale.value) : EdgeInsets.zero,
                               child: Obx(() => AnimatedSize(
                                 duration: const Duration(milliseconds: 250),
@@ -275,7 +275,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                               && replyTo != null
                               && getActiveMwc(replyTo!.guid!) != null)
                             Padding(
-                              padding: EdgeInsets.only(left: (showAvatar || ss.settings.alwaysShowAvatars.value) && replyTo!.isFromMe! ? 35 : 0),
+                              padding: EdgeInsets.only(left: (showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)) && replyTo!.isFromMe! ? 35 : 0),
                               child: DecoratedBox(
                                 decoration: replyTo!.isFromMe == message.isFromMe ? ReplyLineDecoration(
                                   isFromMe: message.isFromMe!,
@@ -290,7 +290,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                   child: ReplyBubble(
                                     parentController: getActiveMwc(replyTo!.guid!)!,
                                     part: replyTo!.guid! == message.threadOriginatorGuid ? message.normalizedThreadPart : 0,
-                                    showAvatar: (chat.isGroup || ss.settings.alwaysShowAvatars.value || !iOS) && !replyTo!.isFromMe!,
+                                    showAvatar: (chat.isGroup || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value) || !iOS) && !replyTo!.isFromMe!,
                                     cvController: widget.cvController,
                                   ),
                                 ),
@@ -302,7 +302,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                               && showSender
                               && e.part == (messageParts.firstWhereOrNull((e) => !e.isUnsent)?.part))
                             Padding(
-                              padding: showAvatar || ss.settings.alwaysShowAvatars.value
+                              padding: showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)
                                   ? EdgeInsets.only(left: 35.0 * ss.settings.avatarScale.value) : EdgeInsets.zero,
                               child: MessageSender(olderMessage: olderMessage, message: message),
                             ),
@@ -315,7 +315,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                               && replyTo != null
                               && getActiveMwc(replyTo!.guid!) != null)
                             Padding(
-                              padding: showAvatar || ss.settings.alwaysShowAvatars.value
+                              padding: showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)
                                   ? const EdgeInsets.only(left: 45.0, right: 10) : const EdgeInsets.symmetric(horizontal: 10),
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
@@ -325,7 +325,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                 child: ReplyBubble(
                                   parentController: getActiveMwc(replyTo!.guid!)!,
                                   part: replyTo!.guid! == message.threadOriginatorGuid ? message.normalizedThreadPart : 0,
-                                  showAvatar: (chat.isGroup || ss.settings.alwaysShowAvatars.value || !iOS)
+                                  showAvatar: (chat.isGroup || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value) || !iOS)
                                       && !replyTo!.isFromMe!,
                                   cvController: widget.cvController,
                                 ),
@@ -337,7 +337,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                               // avatar, if needed
                               if (message.showTail(newerMessage)
                                   && e.part == controller.parts.length - 1
-                                  && (showAvatar || ss.settings.alwaysShowAvatars.value)
+                                  && (showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value))
                                   && !message.isFromMe! && !message.isGroupEvent)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 5.0),
@@ -349,7 +349,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                   ),
                                 ),
                               Padding(
-                                padding: (showAvatar || ss.settings.alwaysShowAvatars.value) && !(message.isGroupEvent || e.isUnsent)
+                                padding: (showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)) && !(message.isGroupEvent || e.isUnsent)
                                     ? EdgeInsets.only(left: 35.0 * ss.settings.avatarScale.value) : EdgeInsets.zero,
                                 child: DecoratedBox(
                                   decoration: iOS && !widget.isReplyThread && ((index == 0 && message.threadOriginatorGuid != null && olderMessage != null)
@@ -369,7 +369,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                       } else {
                                         widget.cvController.selected.add(message);
                                       }
-                                    } : kIsDesktop || kIsWeb || iOS || material ? () => tapped.value = !tapped.value : null,
+                                    } : kIsDesktop || kIsWeb || iOS || material || ss.settings.skin.value == Skins.Light ? () => tapped.value = !tapped.value : null,
                                     child: IgnorePointer(
                                       ignoring: widget.cvController.inSelectMode.value,
                                       child: Container(
@@ -726,7 +726,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                           ),
                           // message properties (replies, edits, effect)
                           Padding(
-                            padding: showAvatar || ss.settings.alwaysShowAvatars.value
+                            padding: showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)
                                 ? EdgeInsets.only(left: 35.0 * ss.settings.avatarScale.value) : EdgeInsets.zero,
                             child: MessageProperties(
                               globalKey: keys.length > index ? keys[index] : null,

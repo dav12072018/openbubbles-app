@@ -62,7 +62,7 @@ class SettingsScaffold extends StatelessWidget {
             surfaceTintColor: context.theme.colorScheme.primary,
             leading: buildBackButton(context),
             backgroundColor: headerColor,
-            centerTitle: ss.settings.skin.value == Skins.iOS,
+            centerTitle: ss.settings.skin.value == Skins.iOS || ss.settings.skin.value == Skins.Light,
             title: Text(
               title,
               style: context.theme.textTheme.titleLarge,

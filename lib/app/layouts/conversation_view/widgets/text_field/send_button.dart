@@ -43,6 +43,12 @@ class SendButtonState extends OptimizedState<SendButton> with SingleTickerProvid
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onSecondaryTap: () {
@@ -79,10 +85,10 @@ class SendButtonState extends OptimizedState<SendButton> with SingleTickerProvid
           child: TextButton(
         style: TextButton.styleFrom(
           backgroundColor: iOS ? context.theme.colorScheme.primary : null,
-          shape: const CircleBorder(),
+          shape: ss.settings.skin.value == Skins.Light ? const RoundedRectangleBorder() : const CircleBorder(),
           padding: const EdgeInsets.all(0),
-          maximumSize: const Size(28, 28),
-          minimumSize: const Size(28, 28),
+          maximumSize: ss.settings.skin.value == Skins.Light ? const Size(56, 48) : const Size(28, 28),
+          minimumSize: ss.settings.skin.value == Skins.Light ? const Size(56, 48) : const Size(28, 28),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         child: AnimatedBuilder(
@@ -93,7 +99,7 @@ class SendButtonState extends OptimizedState<SendButton> with SingleTickerProvid
               decoration: BoxDecoration(
                   shape: iOS ? BoxShape.circle : BoxShape.rectangle,
                   borderRadius: iOS ? null : BorderRadius.circular(10),
-                  gradient: iOS || controller.value != 0
+                  gradient: ss.settings.skin.value != Skins.Light && (iOS || controller.value != 0)
                       ? LinearGradient(
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
@@ -107,7 +113,10 @@ class SendButtonState extends OptimizedState<SendButton> with SingleTickerProvid
                         )
                       : null),
               alignment: Alignment.center,
-              child: Icon(
+              child: ss.settings.skin.value == Skins.Light ? FittedBox(fit: BoxFit.scaleDown, child: Text(
+                controller.value == 0 ? "SEND" : "STOP",
+                style: context.theme.textTheme.labelMedium!.copyWith(color: context.theme.colorScheme.onBackground),
+              )) : Icon(
                 controller.value == 0
                     ? (iOS ? CupertinoIcons.arrow_up : Icons.send_outlined)
                     : (iOS ? CupertinoIcons.xmark : Icons.close),

@@ -138,6 +138,7 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                       },
                       options: Skins.values,
                       textProcessing: (val) => val.name,
+                      useCupertino: false,
                       capitalize: false,
                       title: "App Skin",
                       secondaryColor: headerColor,

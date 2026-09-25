@@ -71,6 +71,13 @@ android {
     flavorDimensions = ["app"]
 
     productFlavors {
+        light {
+            dimension "app"
+            resValue "string", "app_name_en", "OpenBubbles Light"
+            resValue "color", "ic_launcher_background", "#000000"
+            resValue "string", "file_provider", "com.openbubbles.messaging.light.fileprovider"
+            applicationId "com.openbubbles.messaging.light"
+        }
         joel {
             dimension "app"
             resValue "string", "app_name_en", "BlueBubbles Dev (Joel)"
@@ -121,6 +128,7 @@ android {
             productFlavors.alpha.signingConfig signingConfigs.debug
             productFlavors.beta.signingConfig signingConfigs.release
             productFlavors.prod.signingConfig signingConfigs.release
+            productFlavors.light.signingConfig signingConfigs.release
             productFlavors.alpha.signingConfig signingConfigs.release
             minifyEnabled false
             shrinkResources false

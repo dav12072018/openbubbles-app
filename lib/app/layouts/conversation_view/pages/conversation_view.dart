@@ -62,6 +62,12 @@ class ConversationViewState extends OptimizedState<ConversationView> {
     super.dispose();
   }
 
+  // Scaffold consumes keyboard insets before laying out its body. Bound the
+  // Light composer by the real Column constraints as well as its own viewport.
+  Widget _constrainComposer(Widget child) => ss.settings.skin.value == Skins.Light
+      ? Flexible(fit: FlexFit.loose, child: child)
+      : child;
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -86,7 +92,7 @@ class ConversationViewState extends OptimizedState<ConversationView> {
             onSurface: ss.settings.monetTheming.value == Monet.full
                 ? null
                 : (context.theme.extensions[BubbleColors] as BubbleColors?)?.onReceivedBubbleColor,
-            outline: controller.backgroundPoster.value != null ? Colors.white : null,
+            outline: ss.settings.skin.value != Skins.Light && controller.backgroundPoster.value != null ? Colors.white : null,
           ),
         ),
         child: PopScope(
@@ -146,9 +152,9 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        if (controller.backgroundPoster.value != null)
+                        if (ss.settings.skin.value != Skins.Light && controller.backgroundPoster.value != null)
                         ImagePoster(poster: controller.backgroundPoster.value!.poster, images: controller.images),
-                        const Positioned.fill(child: ScreenEffectsWidget()),
+                        if (ss.settings.skin.value != Skins.Light) const Positioned.fill(child: ScreenEffectsWidget()),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -208,10 +214,11 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                                 ],
                               ),
                             ),
-                            Stack(
+                            _constrainComposer(Stack(
                               children: [
                                 Align(
                                   alignment: Alignment.bottomCenter,
+                                  heightFactor: ss.settings.skin.value == Skins.Light ? 1 : null,
                                   child: GestureDetector(
                                     onPanUpdate: (details) {
                                       if (!mounted) return;
@@ -232,7 +239,7 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                                   ),
                                 )
                               ]
-                            ),
+                            )),
                           ],
                         ),
                       ],

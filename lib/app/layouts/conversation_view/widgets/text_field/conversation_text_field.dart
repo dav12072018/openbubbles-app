@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:bluebubbles/app/components/light/light_composer_viewport.dart';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:bluebubbles/app/components/custom/custom_bouncing_scroll_physics.dart';
 import 'package:bluebubbles/app/components/custom_text_editing_controllers.dart';
@@ -394,18 +395,16 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      left: false,
-      right: false,
-      top: false,
-      child: Column(
+    final content = Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
+            Container(
+            decoration: ss.settings.skin.value == Skins.Light ? BoxDecoration(border: Border(top: BorderSide(color: context.theme.dividerColor, width: 0.5))) : null,
             padding: const EdgeInsets.only(bottom: 10.0, top: 10.0),
             child: 
             Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
               IconButton(
+                tooltip: "Add attachment",
                 icon: Icon(
                   iOS
                       ? CupertinoIcons.add_circled_solid
@@ -722,7 +721,11 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
               }),
             ),
           ],
-      ),
+      );
+    return SafeArea(
+      left: false, right: false, top: false,
+      child: ss.settings.skin.value == Skins.Light
+          ? LightComposerViewport(child: content) : content,
     );
   }
 }
@@ -858,7 +861,9 @@ class TextFieldComponentState extends State<TextFieldComponent> {
         valueListenable: isRecordingNotifier,
         builder: (context, isRecording, child) {
         return Container(
-          decoration: iOS
+          decoration: ss.settings.skin.value == Skins.Light
+              ? BoxDecoration(color: context.theme.scaffoldBackgroundColor)
+              : iOS
               ? BoxDecoration(
                   border: Border.fromBorderSide(BorderSide(
                     color: (isRecording & iOS) ? context.theme.colorScheme.primary.withOpacity(1.0) : context.theme.colorScheme.properSurface,
@@ -907,7 +912,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                     scrollPhysics: const CustomBouncingScrollPhysics(),
                     style: context.theme.extension<BubbleText>()!.bubbleText.copyWith(fontWeight: FontWeight.bold),
                     keyboardType: TextInputType.multiline,
-                    maxLines: 14,
+                    maxLines: ss.settings.skin.value == Skins.Light ? (MediaQuery.viewInsetsOf(context).bottom > 0 ? 2 : 4) : 14,
                     minLines: 1,
                     enableIMEPersonalizedLearning: !ss.settings.incognitoKeyboard.value,
                     textInputAction: TextInputAction.next,
@@ -953,7 +958,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                     scrollPhysics: const CustomBouncingScrollPhysics(),
                     style: context.theme.extension<BubbleText>()!.bubbleText,
                     keyboardType: TextInputType.multiline,
-                    maxLines: 14,
+                    maxLines: ss.settings.skin.value == Skins.Light ? (MediaQuery.viewInsetsOf(context).bottom > 0 ? 2 : 4) : 14,
                     minLines: 1,
                     autofocus: (kIsWeb || kIsDesktop) && !isChatCreator,
                     enableIMEPersonalizedLearning: !ss.settings.incognitoKeyboard.value,
@@ -964,7 +969,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                       contentPadding: EdgeInsets.all(iOS && !kIsDesktop && !kIsWeb ? 10 : 12.5),
                       isDense: true,
                       isCollapsed: true,
-                      hintText: isChatCreator
+                      hintText: ss.settings.skin.value == Skins.Light && !isRecording ? "Message" : isChatCreator
                           ? "New Message"
                           : ss.settings.recipientAsPlaceholder.value == true
                               ? isRecording ? "" : chat!.getTitle()

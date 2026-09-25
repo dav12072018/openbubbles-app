@@ -101,6 +101,8 @@ enum Skins {
   iOS,
   Material,
   Samsung,
+  // Append only: skin indices are persisted in settings and backups.
+  Light,
 }
 
 enum SwipeDirection {

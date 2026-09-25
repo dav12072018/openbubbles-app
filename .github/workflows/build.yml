@@ -1,8 +1,23 @@
-on: [ push, pull_request ]
+on: [ push, pull_request, workflow_dispatch ]
 name: Build
 jobs:
+  light-ui:
+    name: Light UI checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.0
+      - name: Test production Light components
+        working-directory: tool/light_preview
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
   build:
-    name: OpenBubbles APK
+    name: OpenBubbles Light APK
     runs-on: ubuntu-latest
     steps:
       - name: Free Disk Space (Ubuntu)
@@ -67,9 +82,9 @@ jobs:
       # First run is expected to fail until ffmpeg_kit_flutter_new is fixed.
       - name: Run Build Script
         run: |
-          flutter build apk --flavor alpha --debug --target-platform android-arm64
+          flutter build apk --flavor light --debug --target-platform android-arm64
       
       - uses: actions/upload-artifact@v4
         with:
-          name: Alpha Debug APK
-          path: build/app/outputs/flutter-apk/app-alpha-debug.apk
+          name: OpenBubbles Light Debug APK
+          path: build/app/outputs/flutter-apk/app-light-debug.apk

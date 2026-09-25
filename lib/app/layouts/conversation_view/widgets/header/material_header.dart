@@ -42,7 +42,9 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
           : SystemUiOverlayStyle.dark,
       automaticallyImplyLeading: false,
       toolbarHeight: (kIsDesktop ? 25 : 0) + kToolbarHeight,
-      leadingWidth: 30,
+      centerTitle: ss.settings.skin.value == Skins.Light,
+      titleSpacing: ss.settings.skin.value == Skins.Light ? 0 : null,
+      leadingWidth: ss.settings.skin.value == Skins.Light ? 48 : 30,
       leading: Padding(
         padding: EdgeInsets.only(left: 5.0, top: kIsDesktop ? 20 : 0),
         child: BackButton(
@@ -99,26 +101,26 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
           padding: EdgeInsets.only(top: kIsDesktop ? 20 : 0),
           child: ManualMark(controller: controller),
         ),
-        if (Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isPhoneNumber)
+        if (ss.settings.skin.value != Skins.Light && Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isPhoneNumber)
           IconButton(
             icon: Icon(Icons.call_outlined, color: context.theme.colorScheme.onBackground),
             onPressed: () {
               launchUrl(Uri(scheme: "tel", path: controller.chat.participants.first.address));
             },
           ),
-        if (Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isEmail)
+        if (ss.settings.skin.value != Skins.Light && Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isEmail)
           IconButton(
             icon: Icon(Icons.mail_outlined, color: context.theme.colorScheme.onBackground),
             onPressed: () {
               launchUrl(Uri(scheme: "mailto", path: controller.chat.participants.first.address));
             },
           ),
-        FaceTimeBtn(controller: controller),
+        if (ss.settings.skin.value != Skins.Light) FaceTimeBtn(controller: controller),
         Padding(
           padding: EdgeInsets.only(top: kIsDesktop ? 20 : 0),
           child: PopupMenuButton<int>(
             color: context.theme.colorScheme.properSurface,
-            shape: ss.settings.skin.value != Skins.Material ? const RoundedRectangleBorder(
+            shape: ss.settings.skin.value == Skins.Light ? const RoundedRectangleBorder() : ss.settings.skin.value != Skins.Material ? const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
                 Radius.circular(20.0),
               ),
@@ -178,12 +180,21 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
                     );
                   },
                 );
+              } else if (value == 4) {
+                final address = controller.chat.participants.first.address;
+                launchUrl(Uri(scheme: address.isEmail ? "mailto" : "tel", path: address));
               } else if (value == 3) {
                 showBookmarksThread(controller, context);
               }
             },
             itemBuilder: (context) {
               return <PopupMenuItem<int>>[
+                if (ss.settings.skin.value == Skins.Light && Platform.isAndroid && !controller.chat.isGroup &&
+                    (controller.chat.participants.first.address.isPhoneNumber || controller.chat.participants.first.address.isEmail))
+                  PopupMenuItem(
+                    value: 4,
+                    child: Text(controller.chat.participants.first.address.isEmail ? 'Email' : 'Call'),
+                  ),
                 PopupMenuItem(
                   value: 0,
                   child: Text(
@@ -502,7 +513,7 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
+        if (ss.settings.skin.value != Skins.Light) Padding(
           padding: const EdgeInsets.only(right: 12.5),
           child: IgnorePointer(
             ignoring: true,
@@ -514,7 +525,7 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
         ),
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: ss.settings.skin.value == Skins.Light ? CrossAxisAlignment.center : CrossAxisAlignment.start,
             children: [
               Obx(() {
                 String _title = title;
@@ -525,7 +536,7 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
                 }
                 return Text(
                   _title,
-                  style: context.theme.textTheme.titleLarge!.apply(color: context.theme.colorScheme.onBackground, fontSizeFactor: 0.85),
+                  style: context.theme.textTheme.titleLarge!.apply(color: context.theme.colorScheme.onBackground, fontSizeFactor: ss.settings.skin.value == Skins.Light ? 0.9 : 0.85),
                   maxLines: 1,
                   overflow: TextOverflow.fade,
                 );

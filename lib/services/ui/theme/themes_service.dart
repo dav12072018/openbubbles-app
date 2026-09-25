@@ -176,6 +176,7 @@ class ThemesService extends GetxService {
             PlatformDispatcher.instance.platformBrightness == Brightness.dark));
 
   bool isGradientBg(BuildContext context) {
+    if (skin == Skins.Light) return false;
     if (inDarkMode(context)) {
       return ThemeStruct.getDarkTheme().gradientBg;
     } else {
