@@ -305,6 +305,7 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
     controller.subjectFocusNode.dispose();
     controller.textController.dispose();
     controller.subjectTextController.dispose();
+    if (ss.settings.skin.value == Skins.Light) controller.showRecording.value = false;
     recorderController?.dispose();
     if (chat.autoSendTypingIndicators ?? ss.settings.privateSendTypingIndicators.value) {
       backend.stoppedTyping(chat);
@@ -416,6 +417,7 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                 ),
                 visualDensity: Platform.isAndroid ? VisualDensity.compact : null,
                 onPressed: () async {
+                  if (ss.settings.skin.value == Skins.Light && controller.showRecording.value) return;
                   if (kIsDesktop) {
                     final res = await FilePicker.platform.pickFiles(withReadStream: true, allowMultiple: true);
                     if (res == null || res.files.isEmpty || res.files.first.readStream == null) return;
@@ -556,6 +558,8 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                     ),
                     if (!kIsWeb)
                       Positioned(
+                          left: ss.settings.skin.value == Skins.Light ? 0 : null,
+                          right: ss.settings.skin.value == Skins.Light ? 0 : null,
                           top: 0,
                           bottom: 0,
                           child: Obx(() => AnimatedSize(
@@ -599,6 +603,7 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                                               textFieldSize: textFieldSize,
                                               iOS: iOS,
                                               samsung: samsung,
+                                              light: ss.settings.skin.value == Skins.Light,
                                         );
                                       }),
                               ))),
@@ -606,7 +611,7 @@ class ConversationTextFieldState extends CustomState<ConversationTextField, void
                   ],
                 ),
               ),
-              if (samsung)
+              if (samsung || ss.settings.skin.value == Skins.Light)
                 Padding(
                   padding: const EdgeInsets.only(right: 5.0),
                   child: TextFieldSuffix(
@@ -827,9 +832,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
     sendMessage = widget.sendMessage;
 
     // add a listener to recorderController to update isRecordingNotifier
-    recorderController?.addListener(() {
-      isRecordingNotifier.value = recorderController?.isRecording ?? false;
-    });
+    recorderController?.addListener(recordingStateChanged);
 
     assert(!(subjectTextController == null && !isChatCreator && ss.settings.enablePrivateAPI.value && ss.settings.privateSubjectLine.value && chat!.isIMessage));
   }
@@ -837,11 +840,16 @@ class TextFieldComponentState extends State<TextFieldComponent> {
   @override
   void dispose() {
     // dispose of the ValueNotifier when the state is disposed
+    recorderController?.removeListener(recordingStateChanged);
     isRecordingNotifier.dispose();
     super.dispose();
   }
 
   bool get iOS => ss.settings.skin.value == Skins.iOS;
+
+  void recordingStateChanged() {
+    if (mounted) isRecordingNotifier.value = recorderController?.isRecording ?? false;
+  }
 
   bool get samsung => ss.settings.skin.value == Skins.Samsung;
 
@@ -906,6 +914,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                 if (!isChatCreator && ss.settings.enablePrivateAPI.value && ss.settings.privateSubjectLine.value && chat!.isIMessage)
                   TextField(
                     textCapitalization: TextCapitalization.sentences,
+                    readOnly: ss.settings.skin.value == Skins.Light && isRecording,
                     focusNode: controller!.subjectFocusNode,
                     autocorrect: true,
                     controller: subjController,
@@ -952,6 +961,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                   bindings: txtController.getShortcuts(),
                   child: TextField(
                     textCapitalization: TextCapitalization.sentences,
+                    readOnly: ss.settings.skin.value == Skins.Light && isRecording,
                     focusNode: controller?.focusNode ?? focusNode,
                     autocorrect: true,
                     controller: txtController,
@@ -984,7 +994,7 @@ class TextFieldComponentState extends State<TextFieldComponent> {
                       fillColor: (isRecording & iOS) ? context.theme.colorScheme.primary.withOpacity(0.3) : Colors.transparent,
                       hintStyle: context.theme.extension<BubbleText>()!.bubbleText.copyWith(color: context.theme.colorScheme.outline),
                       suffixIconConstraints: const BoxConstraints(minHeight: 0),
-                      suffixIcon: samsung && !isChatCreator
+                      suffixIcon: (samsung || ss.settings.skin.value == Skins.Light) && !isChatCreator
                           ? null
                           : Padding(
                               padding: EdgeInsets.only(right: iOS ? 0.0 : 5.0),

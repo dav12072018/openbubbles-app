@@ -19,6 +19,8 @@ jobs:
           flutter pub get
           flutter analyze
           flutter test
+          node test/web_startup_test.mjs
+          flutter build web --web-renderer html --pwa-strategy=none --target demo_main.dart
   build:
     name: OpenBubbles Light APK
     runs-on: ubuntu-latest

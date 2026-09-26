@@ -51,6 +51,8 @@ On the reference preview, Copy is approximately 20.7 sp, Fine 17.2 sp, and Detai
 
 These are visual references, not a reason to remove OpenBubbles functionality. Conversation selection, search, compose, unread indicators, message sending, attachments, accessibility, and system back navigation must remain functional. Sender/recipient distinctions should remain understandable without relying on color.
 
+The transcript uses plain left-aligned text without borders or outgoing fills. Group messages show a smaller sender caption above every message; outgoing messages use “You.” The empty composer exposes a microphone, switching to SEND for a text or attachment draft. Voice notes have explicit stop/cancel controls and a playback review before sending.
+
 ## Fonts, assets, and platform boundary
 
 The SDK first looks for Akkurat in the phone's system fonts, then optionally checks bundled font resources, and otherwise uses Android's default family. **The repository does not include an Akkurat font license or font files.** Do not redistribute Akkurat without a separate license. This fork uses OpenBubbles' existing bundled Inter font as its sans-serif substitute.

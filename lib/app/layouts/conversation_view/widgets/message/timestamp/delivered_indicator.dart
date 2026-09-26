@@ -36,6 +36,7 @@ class _DeliveredIndicatorState extends CustomState<DeliveredIndicator, void, Mes
   }
 
   bool get shouldShow {
+    if (ss.settings.skin.value == Skins.Light && message.dateScheduled != null) return true;
     if (controller.audioWasKept.value != null) return true;
     if (widget.forceShow || message.guid!.contains("temp")) return true;
     if ((!message.isFromMe! && iOS) || (controller.parts.lastOrNull?.isUnsent ?? false)) return false;
@@ -70,7 +71,9 @@ class _DeliveredIndicatorState extends CustomState<DeliveredIndicator, void, Mes
   }
 
   List<InlineSpan> getText() {
-    if (controller.audioWasKept.value != null) {
+    if (ss.settings.skin.value == Skins.Light && message.dateScheduled != null) {
+      return buildTwoPiece("Scheduled", buildDate(message.dateScheduled));
+    } else if (controller.audioWasKept.value != null) {
       return buildTwoPiece("Kept", buildDate(controller.audioWasKept.value!));
     } else if (!(message.isFromMe ?? false)) {
       return buildTwoPiece("Received", buildDate(message.dateCreated));
@@ -99,7 +102,7 @@ class _DeliveredIndicatorState extends CustomState<DeliveredIndicator, void, Mes
       alignment: Alignment.bottomCenter,
       duration: const Duration(milliseconds: 250),
       child: Obx(() => shouldShow && getText().isNotEmpty ? Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15).add(EdgeInsets.only(
+        padding: ss.settings.skin.value == Skins.Light ? const EdgeInsets.only(top: 3) : const EdgeInsets.symmetric(horizontal: 15).add(EdgeInsets.only(
           top: 3,
           left: showAvatar || ss.settings.alwaysShowAvatars.value ? 35 : 0)
         ),

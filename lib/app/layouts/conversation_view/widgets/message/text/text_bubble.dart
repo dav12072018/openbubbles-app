@@ -111,10 +111,11 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      var translucentMode = ss.settings.skin.value != Skins.Light && controller.cvController?.backgroundPoster.value != null;
+      final isLight = ss.settings.skin.value == Skins.Light;
+      var translucentMode = !isLight && controller.cvController?.backgroundPoster.value != null;
       var child = Container(
         constraints: BoxConstraints(
-          maxWidth: message.isBigEmoji ? ns.width(context) : ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 40 - (message.dateScheduled != null ? 4 : 0),
+          maxWidth: isLight ? ns.width(context) - 36 : message.isBigEmoji ? ns.width(context) : ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 40 - (message.dateScheduled != null ? 4 : 0),
           minHeight: 40 - (message.dateScheduled != null ? 4 : 0),
         ),
         padding: EdgeInsets.symmetric(vertical: 10 - (message.dateScheduled != null ? 4 : 0), horizontal: 15 - (message.dateScheduled != null ? 4 : 0))
@@ -138,7 +139,7 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
             context,
             part,
             message,
-            colorOverride: message.dateScheduled != null ? context.theme.colorScheme.primary :
+            colorOverride: isLight ? (selected ? context.theme.colorScheme.onTertiaryContainer : context.theme.colorScheme.onSurface) : message.dateScheduled != null ? context.theme.colorScheme.primary :
                 selected ? context.theme.colorScheme.onTertiaryContainer
                 : ss.settings.skin.value != Skins.Light && ss.settings.colorfulBubbles.value && !message.isFromMe!
                 ? getBubbleColors().first.oppositeLightenOrDarken(75) : null,
@@ -148,7 +149,7 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
             context,
             part,
             message,
-            colorOverride: message.dateScheduled != null ? context.theme.colorScheme.primary :
+            colorOverride: isLight ? (selected ? context.theme.colorScheme.onTertiaryContainer : context.theme.colorScheme.onSurface) : message.dateScheduled != null ? context.theme.colorScheme.primary :
               selected ? context.theme.colorScheme.onTertiaryContainer
                 : ss.settings.skin.value != Skins.Light && ss.settings.colorfulBubbles.value && !message.isFromMe!
                 ? getBubbleColors().first.oppositeLightenOrDarken(75) : null,
@@ -204,7 +205,7 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
           }
         ),
       );
-      if (ss.settings.skin.value == Skins.Light && !message.isBigEmoji && message.dateScheduled == null) {
+      if (isLight) {
         return LightMessageSurface(
           isFromMe: message.isFromMe!,
           selected: selected,

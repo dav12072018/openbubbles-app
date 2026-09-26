@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../lib/app/components/light/light_conversation_row.dart';
 import '../../../lib/app/components/light/light_composer_viewport.dart';
 import '../../../lib/app/components/light/light_message_surface.dart';
+import '../../../lib/app/components/light/light_message_sender.dart';
 import '../../../lib/app/components/light/light_theme.dart';
 import 'preview_app.dart';
 
@@ -159,7 +160,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
           expect(find.text('Message'), findsOneWidget);
-          expect(find.byTooltip('Preview send'), findsOneWidget);
+          expect(find.byTooltip('Record voice note').hitTestable(), findsOneWidget);
           await tester.scrollUntilVisible(find.text('Delivered'), 160);
           await tester.pumpAndSettle();
           expect(find.text('Delivered').hitTestable(), findsOneWidget);
@@ -171,7 +172,7 @@ void main() {
 
   for (final brightness in Brightness.values) {
     testWidgets(
-        '${brightness.name} messages stay distinct and legible in both directions and selection',
+        '${brightness.name} messages have no boxes or fill and retain selection contrast',
         (tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: createLightPhoneTheme(brightness),
@@ -191,17 +192,55 @@ void main() {
             .first);
         final decoration = container.decoration! as BoxDecoration;
         expect(decoration.borderRadius, isNull);
+        expect(decoration.border, isNull);
         return decoration.color!;
       }
 
       for (final text in ['Received', 'Sent', 'Selected']) {
         final style =
             DefaultTextStyle.of(tester.element(find.text(text))).style;
-        expect(contrast(style.color!, background(text)),
+        final fill = background(text);
+        final canvas =
+            Theme.of(tester.element(find.text(text))).scaffoldBackgroundColor;
+        expect(contrast(style.color!, Color.alphaBlend(fill, canvas)),
             greaterThanOrEqualTo(4.5));
       }
-      expect(background('Received'), isNot(background('Sent')));
+      expect(background('Received'), Colors.transparent);
+      expect(background('Sent'), Colors.transparent);
+      expect(background('Selected'), isNot(Colors.transparent));
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+        '${brightness.name} sender captions sit above smaller than message text',
+        (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        theme: createLightPhoneTheme(brightness),
+        home: const Scaffold(
+          body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            LightMessageSender(name: 'Jamie'),
+            LightMessageSurface(
+                isFromMe: false, child: Text('I can bring coffee.')),
+            LightMessageSender(name: 'You'),
+            LightMessageSurface(isFromMe: true, child: Text('See you soon.')),
+          ]),
+        ),
+      ));
+      final caption = tester.widget<Text>(find.text('Jamie')).style!;
+      final body =
+          DefaultTextStyle.of(tester.element(find.text('I can bring coffee.')))
+              .style;
+      expect(caption.fontSize, lessThan(body.fontSize!));
+      expect(tester.getBottomLeft(find.text('Jamie')).dy,
+          lessThan(tester.getTopLeft(find.text('I can bring coffee.')).dy));
+      expect(tester.getTopLeft(find.text('I can bring coffee.')).dx,
+          tester.getTopLeft(find.text('See you soon.')).dx);
+      expect(
+          contrast(
+              caption.color!,
+              Theme.of(tester.element(find.text('Jamie')))
+                  .scaffoldBackgroundColor),
+          greaterThanOrEqualTo(4.5));
     });
   }
 

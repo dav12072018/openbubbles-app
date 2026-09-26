@@ -167,6 +167,8 @@ class _SendAnimationState
 
   @override
   Widget build(BuildContext context) {
+    // Keep this widget mounted to register sendFunc, without a transient bubble.
+    if (ss.settings.skin.value == Skins.Light) return const SizedBox.shrink();
     final typicalWidth = message?.isBigEmoji ?? false ? ns.width(context) : ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 40;
     const duration = 500;
     const curve = Curves.easeInOut;

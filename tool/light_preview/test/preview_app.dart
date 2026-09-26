@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../lib/app/components/light/light_conversation_row.dart';
 import '../../../lib/app/components/light/light_message_surface.dart';
+import '../../../lib/app/components/light/light_message_sender.dart';
+import '../../../lib/app/components/light/light_voice_note_controls.dart';
 import '../../../lib/app/components/light/light_theme.dart';
 
 void main() => runApp(const LightComponentPreview());
@@ -121,9 +123,10 @@ class _FixtureInbox extends StatelessWidget {
                       foregroundColor: Theme.of(context).colorScheme.onSurface,
                       shape: const RoundedRectangleBorder(),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                        textStyle: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 15, fontWeight: FontWeight.w400),
+                      textStyle: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w400),
                     ),
                     child: FittedBox(
                         fit: BoxFit.scaleDown, child: Text(label, maxLines: 1)),
@@ -142,13 +145,19 @@ class _FixtureConversation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget message(String text, {required bool fromMe}) => Align(
-          alignment: fromMe ? Alignment.centerRight : Alignment.centerLeft,
+          alignment: Alignment.centerLeft,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 18),
-            child: LightMessageSurface(
-              isFromMe: fromMe,
-              constraints: const BoxConstraints(maxWidth: 286),
-              child: Text(text),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (fromMe) const LightMessageSender(name: 'You'),
+                LightMessageSurface(
+                  isFromMe: fromMe,
+                  constraints: const BoxConstraints(maxWidth: 324),
+                  child: Text(text),
+                ),
+              ],
             ),
           ),
         );
@@ -191,7 +200,7 @@ class _FixtureConversation extends StatelessWidget {
                 message('I’ll bring coffee.', fromMe: false),
                 message('Perfect. See you soon.', fromMe: true),
                 Align(
-                  alignment: Alignment.centerRight,
+                  alignment: Alignment.centerLeft,
                   child: Text('Delivered',
                       style: Theme.of(context).textTheme.labelSmall),
                 ),
@@ -217,18 +226,12 @@ class _FixtureConversation extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodyMedium),
                 ),
               ),
-              Tooltip(
-                  message: 'Preview send',
-                  child: SizedBox(
-                    width: 56,
-                    height: 48,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text('SEND', style: TextStyle(fontSize: 14))),
-                    ),
-                  )),
+              LightVoiceNoteControls(
+                recording: false,
+                onRecord: () {},
+                onStop: () {},
+                onCancel: () {},
+              ),
             ],
           ),
         ),

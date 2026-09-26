@@ -117,7 +117,10 @@ class _AttachmentHolderState extends CustomState<AttachmentHolder, void, Message
             }
           },
           child: Ink(
-            color: context.theme.colorScheme.properSurface,
+            color: ss.settings.skin.value == Skins.Light &&
+                    (attachment.mimeStart == 'audio' || attachment.uti == 'com.apple.coreaudio-format')
+                ? context.theme.scaffoldBackgroundColor
+                : context.theme.colorScheme.properSurface,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: ns.width(context) * 0.5,
@@ -309,7 +312,8 @@ class _AttachmentHolderState extends CustomState<AttachmentHolder, void, Message
                               );
                             } else if (attachment.mimeStart == "audio" || attachment.uti == "com.apple.coreaudio-format") {
                               return Padding(
-                                padding: showTail ? EdgeInsets.only(left: message.isFromMe! ? 0 : 10, right: message.isFromMe! ? 10 : 0) : EdgeInsets.zero,
+                                padding: ss.settings.skin.value == Skins.Light ? EdgeInsets.zero
+                                    : showTail ? EdgeInsets.only(left: message.isFromMe! ? 0 : 10, right: message.isFromMe! ? 10 : 0) : EdgeInsets.zero,
                                 child: AudioPlayer(
                                   transcript: audioTranscript,
                                   attachment: attachment,

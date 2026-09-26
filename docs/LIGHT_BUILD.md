@@ -31,6 +31,10 @@ New Android installations default to **Light**. A saved App Skin preference is r
 
 The Light header's overflow menu retains call/email and chat actions. FaceTime actions remain in conversation details. Long-press a conversation to select it; the bottom actions support read/unread, archive, pin, mute, and delete. Recently deleted conversations use the upstream recovery dialog.
 
+Messages are plain text on the left, with smaller sender names above group messages and “You” above outgoing messages. With an empty composer, tap the microphone to record a voice note. STOP opens playback review; DISCARD removes it and SEND uses the existing audio-message queue. Microphone access is requested when you start recording.
+
+The [interactive browser demo](../tool/light_preview/README.md) supports sample conversations and local microphone recordings without an account. Its recordings stay in memory and disappear on reload; they are never sent to the messaging service.
+
 ## Checks
 
 ```sh
@@ -40,7 +44,7 @@ flutter pub get
 flutter test
 ```
 
-The main application contains pre-existing analyzer warnings and deprecated API notices. Full-repository analysis also traverses upstream submodule examples and the stale integration test driver; use `lib` to check production Dart code.
+The main application contains pre-existing analyzer warnings and deprecated API notices. Analysis of `lib` also reports five existing errors in `database/html/chat.dart` (four HTML/IO Chat type mismatches and an undefined Logger); the Android arm64 Flutter bundle compiles successfully. Full-repository analysis additionally traverses upstream submodule examples and the stale integration test driver. The isolated preview package analyzes without issues.
 
 The isolated preview package imports the actual production theme, inbox row, message surface, and compact composer viewport. Its fixture screens deliberately do not initialize native services. See its README for visual render commands, tested sizes, and accessibility coverage. Rendered fixture images are **component previews**, not evidence of a signed-in Android session.
 
