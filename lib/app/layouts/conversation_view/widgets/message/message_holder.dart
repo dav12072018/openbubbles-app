@@ -229,14 +229,14 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: !isLight && message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  crossAxisAlignment: message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                   children: [
                     // message column
                     ...messageParts.mapIndexed((index, e) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2.0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: !isLight && message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        crossAxisAlignment: message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                         children: [
                           // add previous edits if needed
                           if (e.isEdited)
@@ -250,7 +250,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                 child: controller.showEdits.value ? Opacity(
                                   opacity: 0.75,
                                   child: Column(
-                                    crossAxisAlignment: !isLight && message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                                    crossAxisAlignment: message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: e.edits.map((edit) => ClipPath(
                                       clipper: TailClipper(
@@ -313,7 +313,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                               child: MessageSender(olderMessage: olderMessage, message: message),
                             ),
                           // Plain messages give reactions their own row, so
-                          // badges cannot overlap text or escape the left gutter.
+                          // badges cannot overlap text or escape the gutters.
                           if ((messageParts.length == 1 && reactions.isNotEmpty) || reactionsForPart(e.part).isNotEmpty)
                             isLight
                                 ? Padding(
@@ -347,12 +347,15 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                   ? const EdgeInsets.only(left: 45.0, right: 10) : const EdgeInsets.symmetric(horizontal: 10),
                               child: DecoratedBox(
                                 decoration: isLight
-                                    ? BoxDecoration(border: Border(left: BorderSide(color: context.theme.colorScheme.outlineVariant)))
+                                    ? BoxDecoration(border: message.isFromMe!
+                                        ? Border(right: BorderSide(color: context.theme.colorScheme.outlineVariant))
+                                        : Border(left: BorderSide(color: context.theme.colorScheme.outlineVariant)))
                                     : BoxDecoration(
                                         borderRadius: BorderRadius.circular(25),
                                         border: Border.fromBorderSide(BorderSide(color: context.theme.colorScheme.properSurface)),
                                       ),
                                 child: ReplyBubble(
+                                  textAlign: isLight ? (message.isFromMe! ? TextAlign.right : TextAlign.left) : TextAlign.start,
                                   parentController: getActiveMwc(replyTo!.guid!)!,
                                   part: replyTo!.guid! == message.threadOriginatorGuid ? message.normalizedThreadPart : 0,
                                   showAvatar: (chat.isGroup || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value) || !iOS)
@@ -404,7 +407,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                       ignoring: widget.cvController.inSelectMode.value,
                                       child: Container(
                                         width: double.infinity,
-                                        alignment: !isLight && message.isFromMe! ? Alignment.centerRight : Alignment.centerLeft,
+                                        alignment: message.isFromMe! ? Alignment.centerRight : Alignment.centerLeft,
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
@@ -424,7 +427,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                             // otherwise show content
                                             if (!message.isGroupEvent && !e.isUnsent)
                                               lightMessageContent(Column(
-                                                crossAxisAlignment: !isLight && message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                                                crossAxisAlignment: message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                                 children: [
                                                   // interactive messages may have subjects, so render them here
                                                   // also render the subject for attachments that may have not rendered already
@@ -572,6 +575,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                                               child: CallbackShortcuts(
                                                                                 bindings: editStuff.item3.getShortcuts(),
                                                                                 child: TextField(
+                                                                                textAlign: isLight ? TextAlign.right : TextAlign.start,
                                                                                 textCapitalization: TextCapitalization.sentences,
                                                                                 autocorrect: true,
                                                                                 controller: editStuff.item3,

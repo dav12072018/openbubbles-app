@@ -160,7 +160,8 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
           expect(find.text('Message'), findsOneWidget);
-          expect(find.byTooltip('Record voice note').hitTestable(), findsOneWidget);
+          expect(find.byTooltip('Record voice note').hitTestable(),
+              findsOneWidget);
           await tester.scrollUntilVisible(find.text('Delivered'), 160);
           await tester.pumpAndSettle();
           expect(find.text('Delivered').hitTestable(), findsOneWidget);
@@ -221,7 +222,7 @@ void main() {
             LightMessageSender(name: 'Jamie'),
             LightMessageSurface(
                 isFromMe: false, child: Text('I can bring coffee.')),
-            LightMessageSender(name: 'You'),
+            LightMessageSender(name: 'You', isFromMe: true),
             LightMessageSurface(isFromMe: true, child: Text('See you soon.')),
           ]),
         ),
@@ -233,8 +234,16 @@ void main() {
       expect(caption.fontSize, lessThan(body.fontSize!));
       expect(tester.getBottomLeft(find.text('Jamie')).dy,
           lessThan(tester.getTopLeft(find.text('I can bring coffee.')).dy));
-      expect(tester.getTopLeft(find.text('I can bring coffee.')).dx,
-          tester.getTopLeft(find.text('See you soon.')).dx);
+      expect(tester.getBottomLeft(find.text('You')).dy,
+          lessThan(tester.getTopLeft(find.text('See you soon.')).dy));
+      expect(
+          DefaultTextStyle.of(tester.element(find.text('I can bring coffee.')))
+              .textAlign,
+          TextAlign.left);
+      expect(
+          DefaultTextStyle.of(tester.element(find.text('See you soon.')))
+              .textAlign,
+          TextAlign.right);
       expect(
           contrast(
               caption.color!,

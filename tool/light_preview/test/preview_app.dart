@@ -145,13 +145,15 @@ class _FixtureConversation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget message(String text, {required bool fromMe}) => Align(
-          alignment: Alignment.centerLeft,
+          alignment: fromMe ? Alignment.centerRight : Alignment.centerLeft,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 18),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  fromMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
-                if (fromMe) const LightMessageSender(name: 'You'),
+                if (fromMe)
+                  const LightMessageSender(name: 'You', isFromMe: true),
                 LightMessageSurface(
                   isFromMe: fromMe,
                   constraints: const BoxConstraints(maxWidth: 324),
@@ -200,7 +202,7 @@ class _FixtureConversation extends StatelessWidget {
                 message('I’ll bring coffee.', fromMe: false),
                 message('Perfect. See you soon.', fromMe: true),
                 Align(
-                  alignment: Alignment.centerLeft,
+                  alignment: Alignment.centerRight,
                   child: Text('Delivered',
                       style: Theme.of(context).textTheme.labelSmall),
                 ),

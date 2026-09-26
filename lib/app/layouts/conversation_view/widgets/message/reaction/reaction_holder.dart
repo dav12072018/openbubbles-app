@@ -32,6 +32,7 @@ class _ReactionHolderState extends OptimizedState<ReactionHolder> {
 
     if (ss.settings.skin.value == Skins.Light) {
       return Wrap(
+        alignment: widget.message.isFromMe! ? WrapAlignment.end : WrapAlignment.start,
         spacing: 4,
         runSpacing: 4,
         children: [

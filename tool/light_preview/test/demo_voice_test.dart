@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../lib/app/components/light/light_message_sender.dart';
+import '../../../lib/app/components/light/light_message_surface.dart';
 import '../../../lib/app/components/light/light_voice_note_controls.dart';
 import '../demo_app.dart';
 import '../voice/voice_capture.dart';
@@ -103,6 +105,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byTooltip('Record voice note'), findsOneWidget);
     expect(find.text('Voice note · 00:03'), findsOneWidget);
+    final voiceSurface = find.ancestor(
+        of: find.text('Voice note · 00:03'),
+        matching: find.byType(LightMessageSurface));
+    expect(tester.getRect(voiceSurface).right, closeTo(342, 0.01));
+    expect(tester.getRect(find.text('You').last).right, closeTo(342, 0.01));
     await tester.tap(find.byTooltip('Play voice note'));
     await tester.pumpAndSettle();
     expect(capture.plays, 2);
@@ -151,7 +158,7 @@ void main() {
   });
 
   testWidgets(
-      'group sender captions are separate and all message bodies align left',
+      'group sender captions stay with incoming left and sent right messages',
       (tester) async {
     tester.view.physicalSize = const Size(360, 800);
     tester.view.devicePixelRatio = 1;
@@ -165,12 +172,63 @@ void main() {
       final caption = tester.widget<Text>(find.text(name));
       expect(caption.style!.fontSize, 14);
     }
-    final incomingX = tester.getTopLeft(find.text('I can bring coffee.')).dx;
-    expect(tester.getTopLeft(find.text('I’ll bring the cups.')).dx, incomingX);
-    expect(tester.getTopLeft(find.text('See you both at nine.')).dx, incomingX);
+    expect(tester.getRect(find.text('I can bring coffee.')).left,
+        closeTo(18, 0.01));
+    expect(tester.getRect(find.text('I’ll bring the cups.')).left,
+        closeTo(18, 0.01));
+    expect(tester.getRect(find.text('Jamie')).left, closeTo(18, 0.01));
+    expect(tester.getRect(find.text('Morgan')).left, closeTo(18, 0.01));
+    expect(tester.getRect(find.text('See you both at nine.')).right,
+        closeTo(342, 0.01));
+    expect(tester.getRect(find.text('You')).right, closeTo(342, 0.01));
     expect(find.text('Jamie: I can bring coffee.'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  for (final thread in ['Alex Morgan', 'Saturday walk']) {
+    for (final scale in [1.0, 1.6]) {
+      testWidgets(
+          '$thread newly sent wrapped text and You caption align right at ${scale}x',
+          (tester) async {
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await tester.pumpWidget(LightDemoApp(voiceCapture: FakeVoiceCapture()));
+        await tester.tap(find.text(thread));
+        await tester.pumpAndSettle();
+        final incoming = thread == 'Alex Morgan'
+            ? 'Meet you at the trailhead.'
+            : 'I’ll bring the cups.';
+        expect(tester.getRect(find.text(incoming)).left, closeTo(18, 0.01));
+        const message =
+            'I will meet you by the park after work and bring the map for our walk. See you soon.';
+        await tester.enterText(
+            find.byKey(const ValueKey('demo-draft')), message);
+        await tester.pump();
+        await tester.tap(find.text('SEND'));
+        await tester.pumpAndSettle();
+        final paragraph =
+            tester.renderObject<RenderParagraph>(find.text(message));
+        final lines = paragraph.getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: message.length));
+        expect(lines.length, greaterThan(1));
+        expect(paragraph.textAlign, TextAlign.right);
+        expect(tester.getRect(find.text(message)).right, closeTo(342, 0.01));
+        expect(
+            paragraph
+                .localToGlobal(Offset(lines.last.right, lines.last.bottom))
+                .dx,
+            closeTo(342, 0.01));
+        expect(tester.getRect(find.text('You').last).right, closeTo(342, 0.01));
+        expect(tester.getBottomLeft(find.text('You').last).dy,
+            lessThan(tester.getTopLeft(find.text(message)).dy));
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
 
   testWidgets(
       'native Light voice controls retain compact reachable callbacks at 1.6x',

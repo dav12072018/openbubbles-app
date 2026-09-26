@@ -17,6 +17,7 @@ class MessageSender extends StatelessWidget {
     if (ss.settings.skin.value == Skins.Light) {
       final name = message.handle?.displayName.trim();
       return LightMessageSender(
+        isFromMe: message.isFromMe == true,
         name: message.isFromMe == true
             ? 'You'
             : name == null || name.isEmpty

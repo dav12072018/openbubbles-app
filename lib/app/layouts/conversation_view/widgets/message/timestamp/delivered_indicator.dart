@@ -108,7 +108,7 @@ class _DeliveredIndicatorState extends CustomState<DeliveredIndicator, void, Mes
         ),
         child: Text.rich(TextSpan(
           children: getText(),
-        )),
+        ), textAlign: ss.settings.skin.value == Skins.Light ? (message.isFromMe! ? TextAlign.right : TextAlign.left) : TextAlign.start),
       ) : const SizedBox.shrink()),
     );
   }

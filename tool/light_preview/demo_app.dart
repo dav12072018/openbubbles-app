@@ -534,15 +534,19 @@ class _DemoHomeState extends State<_DemoHome> {
                                         padding:
                                             const EdgeInsets.only(bottom: 18),
                                         child: Align(
-                                          alignment: Alignment.centerLeft,
+                                          alignment: message.fromMe
+                                              ? Alignment.centerRight
+                                              : Alignment.centerLeft,
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: message.fromMe
+                                                ? CrossAxisAlignment.end
+                                                : CrossAxisAlignment.start,
                                             children: [
                                               if (thread.isGroup ||
                                                   message.fromMe)
                                                 LightMessageSender(
+                                                    isFromMe: message.fromMe,
                                                     name: message.fromMe
                                                         ? 'You'
                                                         : message.sender ??

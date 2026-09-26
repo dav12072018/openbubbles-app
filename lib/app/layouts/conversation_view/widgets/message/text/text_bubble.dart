@@ -181,6 +181,7 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
                     );
                   },
                   child: RichText(
+                    textAlign: isLight ? (message.isFromMe! ? TextAlign.right : TextAlign.left) : TextAlign.start,
                     textScaler: ss.settings.skin.value == Skins.Light ? MediaQuery.textScalerOf(context) : TextScaler.noScaling,
                     text: TextSpan(
                       children: snapshot.data!,
@@ -193,6 +194,7 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
                 child: Padding(
                   padding: message.fullText.length == 1 ? const EdgeInsets.only(left: 3, right: 3) : EdgeInsets.zero,
                   child: RichText(
+                    textAlign: isLight ? (message.isFromMe! ? TextAlign.right : TextAlign.left) : TextAlign.start,
                     textScaler: ss.settings.skin.value == Skins.Light ? MediaQuery.textScalerOf(context) : TextScaler.noScaling,
                     text: TextSpan(
                       children: snapshot.data!,

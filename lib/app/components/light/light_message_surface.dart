@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Plain message text shared by the live transcript and preview.
-/// Sender captions identify direction; only selection adds a background.
+/// Text follows message direction; only selection adds a background.
 class LightMessageSurface extends StatelessWidget {
   const LightMessageSurface({
     super.key,
@@ -32,6 +32,7 @@ class LightMessageSurface extends StatelessWidget {
       ),
       child: DefaultTextStyle(
         style: theme.textTheme.bodyLarge!.copyWith(color: foreground),
+        textAlign: isFromMe ? TextAlign.right : TextAlign.left,
         child: child,
       ),
     );

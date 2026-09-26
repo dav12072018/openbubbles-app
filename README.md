@@ -3,7 +3,7 @@
 An Android fork of [OpenBubbles](https://github.com/OpenBubbles/openbubbles-app) with a monochrome interface inspired by the [Light Phone III SDK examples](https://github.com/lightphone/light-sdk/tree/main/examples).
 
 - Flat conversation list with large text, unread dots, and SEARCH / NEW / MENU controls.
-- Black and white themes, plain left-aligned messages, smaller group sender labels, and a compact conversation header.
+- Black and white themes, plain messages with incoming on the left and sent messages on the right, smaller group sender labels, and a compact conversation header.
 - A visible microphone records voice notes, with stop, cancel, playback, and send controls. Text drafts use a SEND button.
 - Existing OpenBubbles messaging, attachments, replies, search, archives, settings, and account setup remain connected to the original services.
 - New Android installs start with the **Light** skin in dark mode. Existing saved skins are preserved. Choose **Settings → Appearance → App Skin → Light** to switch; use App Theme to choose dark, light, or system appearance.
