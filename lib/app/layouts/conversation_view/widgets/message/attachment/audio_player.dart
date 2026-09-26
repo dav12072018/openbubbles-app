@@ -143,6 +143,7 @@ class _AudioPlayerState extends OptimizedState<AudioPlayer>
                   },
                 },
                 child: IconButton(
+                  tooltip: controller?.playerState == PlayerState.playing ? 'Pause audio' : 'Play audio',
                   focusNode: widget.playButtonFocusNode,
                   style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.resolveWith((states) =>
@@ -314,6 +315,7 @@ class _DesktopAudioPlayerState extends OptimizedState<AudioPlayer>
                 },
               },
               child: IconButton(
+                tooltip: controller?.state.playing == true ? 'Pause audio' : 'Play audio',
                 focusNode: widget.playButtonFocusNode,
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.resolveWith((states) =>

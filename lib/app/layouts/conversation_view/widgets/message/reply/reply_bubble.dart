@@ -18,11 +18,13 @@ class ReplyBubble extends CustomStateful<MessageWidgetController> {
     required this.part,
     required this.showAvatar,
     required this.cvController,
+    this.textAlign = TextAlign.start,
   });
 
   final int part;
   final bool showAvatar;
   final ConversationViewController cvController;
+  final TextAlign textAlign;
 
   @override
   CustomState createState() => _ReplyBubbleState();
@@ -83,6 +85,7 @@ class _ReplyBubbleState extends CustomState<ReplyBubble, void, MessageWidgetCont
                   ),
                 ]),
                 style: context.textTheme.labelLarge!.copyWith(color: context.theme.colorScheme.onBackground),
+                textAlign: widget.textAlign,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

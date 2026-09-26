@@ -6,6 +6,7 @@ import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/pages/conversation_list.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/cupertino_conversation_tile.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/material_conversation_tile.dart';
+import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/light_conversation_tile.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/samsung_conversation_tile.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/pages/conversation_view.dart';
 import 'package:bluebubbles/app/components/avatars/contact_avatar_group_widget.dart';
@@ -187,6 +188,9 @@ class ConversationTileController extends StatefulController {
     if (ss.settings.skin.value == Skins.Samsung) {
       updateWidgets<SamsungConversationTile>(null);
     }
+    if (ss.settings.skin.value == Skins.Light) {
+      updateWidgets<LightConversationTile>(null);
+    }
   }
 }
 
@@ -280,7 +284,7 @@ class _ConversationTileState extends CustomState<ConversationTile, void, Convers
         return KeyEventResult.ignored;
       },
       child: DpadFocusable(
-        onSelect: () => controller.onTap(context, false),
+        onSelect: () => controller.onTap(context, widget.deletedMode),
         autofocus: widget.autofocus && ss.settings.isDumb.value,
         child: MouseRegion(
           onEnter: (event) => controller.hoverHighlight.value = true,
@@ -299,6 +303,10 @@ class _ConversationTileState extends CustomState<ConversationTile, void, Convers
               parentController: controller,
               deletedMode: widget.deletedMode,
             ),
+            lightSkin: LightConversationTile(
+              parentController: controller,
+              deletedMode: widget.deletedMode,
+            ),
           ),
         ),
       ),
@@ -307,9 +315,10 @@ class _ConversationTileState extends CustomState<ConversationTile, void, Convers
 }
 
 class ChatTitle extends CustomStateful<ConversationTileController> {
-  const ChatTitle({Key? key, required super.parentController, required this.style});
+  const ChatTitle({Key? key, required super.parentController, required this.style, this.maxLines});
 
   final TextStyle style;
+  final int? maxLines;
 
   @override
   State<StatefulWidget> createState() => _ChatTitleState();
@@ -423,15 +432,17 @@ class _ChatTitleState extends CustomState<ChatTitle, void, ConversationTileContr
           ),
         ),
         overflow: TextOverflow.ellipsis,
+        maxLines: widget.maxLines,
       );
     });
   }
 }
 
 class ChatSubtitle extends CustomStateful<ConversationTileController> {
-  const ChatSubtitle({Key? key, required super.parentController, required this.style});
+  const ChatSubtitle({Key? key, required super.parentController, required this.style, this.maxLines});
 
   final TextStyle style;
+  final int? maxLines;
 
   @override
   State<StatefulWidget> createState() => _ChatSubtitleState();
@@ -558,7 +569,7 @@ class _ChatSubtitleState extends CustomState<ChatSubtitle, void, ConversationTil
           ),
         ),
         overflow: TextOverflow.ellipsis,
-        maxLines: ss.settings.denseChatTiles.value ? 1 : material ? 3 : 2,
+        maxLines: widget.maxLines ?? (ss.settings.denseChatTiles.value ? 1 : material ? 3 : 2),
       );
     });
   }

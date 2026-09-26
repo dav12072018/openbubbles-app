@@ -1,0 +1,20 @@
+name: openbubbles_light_component_preview
+description: Isolated checks and sample-data previews of production Light UI components.
+publish_to: none
+version: 1.0.0
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/sample-image.png
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf

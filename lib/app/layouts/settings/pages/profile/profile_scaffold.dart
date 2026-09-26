@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/layouts/chat_creator/chat_creator.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/profile/poster_edit.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/profile/posterkit.dart';
@@ -271,7 +272,7 @@ class ProfileScaffoldState
                                   var activePath = widget.handle != null ? widget.handle!.getPoster() : ss.settings.userPosterPath.value;
                                   Navigator.of(context).push(
                                     ThemeSwitcher.buildPageRoute(
-                                      builder: (context) => PosterEdit(poster: usePoster, handle: widget.handle, 
+                                      builder: originalSettingsPageBuilder((context) => PosterEdit(poster: usePoster, handle: widget.handle,
                                         activePath: activePath, 
                                         posterEdited: (newPath) async {
                                           if (activePath != newPath && activePath != null) {
@@ -285,7 +286,7 @@ class ProfileScaffoldState
                                             await ss.saveSettings();
                                           }
                                           updatePoster(); (widget.posterEdited ?? () {})();
-                                        },),
+                                        },)),
                                     ),
                                   );
                                 },

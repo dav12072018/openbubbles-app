@@ -13,6 +13,7 @@ class VoiceMessageRecorder extends StatefulWidget {
     required this.textFieldSize,
     required this.iOS,
     required this.samsung,
+    this.light = false,
   });
 
   final RecorderController? recorderController;
@@ -22,6 +23,7 @@ class VoiceMessageRecorder extends StatefulWidget {
   final bool iOS;
 
   final bool samsung;
+  final bool light;
 
   @override
   _VoiceMessageRecorderState createState() => _VoiceMessageRecorderState();
@@ -39,6 +41,26 @@ class _VoiceMessageRecorderState extends State<VoiceMessageRecorder> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.light) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: context.theme.scaffoldBackgroundColor,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        alignment: Alignment.centerLeft,
+        child: StreamBuilder<Duration>(
+          stream: recordingDurationStream,
+          initialData: Duration.zero,
+          builder: (context, snapshot) {
+            final duration = snapshot.data ?? Duration.zero;
+            final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
+            return Text('Recording ${duration.inMinutes}:$seconds',
+                maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: context.theme.textTheme.bodyMedium);
+          },
+        ),
+      );
+    }
     return Padding(
         padding: const EdgeInsets.only(left: 1),
         child: Row(

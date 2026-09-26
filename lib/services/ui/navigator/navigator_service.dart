@@ -1,4 +1,5 @@
 import 'package:bluebubbles/app/wrappers/titlebar_wrapper.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/wrappers/theme_switcher.dart';
 import 'package:bluebubbles/helpers/types/helpers/misc_helpers.dart';
 import 'package:bluebubbles/services/services.dart';
@@ -73,11 +74,11 @@ class NavigatorService extends GetxService {
   /// Push a new route onto the settings navigator
   Future<dynamic> pushSettings(BuildContext context, Widget widget, {Bindings? binding}) async {
     if (Get.keys.containsKey(3) && isTabletMode(context)) {
-      return await Get.to(() => widget, transition: Transition.rightToLeft, id: 3, binding: binding);
+      return await Get.to(() => OriginalSettingsTheme(child: widget), transition: Transition.rightToLeft, id: 3, binding: binding);
     } else {
       binding?.dependencies();
       return await Navigator.of(context).push(ThemeSwitcher.buildPageRoute(
-        builder: (BuildContext context) => TitleBarWrapper(child: widget),
+        builder: originalSettingsPageBuilder((context) => TitleBarWrapper(child: widget)),
       ));
     }
   }
@@ -112,7 +113,7 @@ class NavigatorService extends GetxService {
     if (Get.keys.containsKey(3) && isTabletMode(context)) {
       // we only want to offUntil when in landscape, otherwise when the user presses back, the previous page will be the chat list
       Get.offUntil(GetPageRoute(
-        page: () => widget,
+        page: () => OriginalSettingsTheme(child: widget),
         binding: binding,
         transition: Transition.noTransition,
         transitionDuration: Duration.zero,
@@ -121,7 +122,7 @@ class NavigatorService extends GetxService {
       binding?.dependencies();
       // only push here because we don't want to remove underlying routes when in portrait
       Navigator.of(context).push(ThemeSwitcher.buildPageRoute(
-        builder: (BuildContext context) => TitleBarWrapper(child: widget),
+        builder: originalSettingsPageBuilder((context) => TitleBarWrapper(child: widget)),
       ));
     }
   }

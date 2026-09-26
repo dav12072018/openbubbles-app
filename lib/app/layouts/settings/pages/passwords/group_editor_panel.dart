@@ -1,4 +1,5 @@
 import 'package:bluebubbles/app/layouts/settings/pages/passwords/group_invite_creator.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/layouts/settings/widgets/settings_widgets.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
@@ -92,7 +93,7 @@ class _GroupEditorPanelState extends OptimizedState<GroupEditorPanel> {
     if (!_canEditGroup) return;
     final handles = await Navigator.of(context).push<List<String>>(
       CupertinoPageRoute(
-        builder: (_) => const GroupInviteCreator(),
+        builder: originalSettingsPageBuilder((_) => const GroupInviteCreator()),
       ),
     );
     if (handles == null || handles.isEmpty) {

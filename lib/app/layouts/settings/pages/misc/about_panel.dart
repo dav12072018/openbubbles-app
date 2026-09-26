@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/layouts/settings/widgets/content/next_button.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/app/layouts/settings/widgets/settings_widgets.dart';
@@ -263,7 +264,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                             await DefaultAssetBundle.of(context).loadString('assets/changelog/changelog.md');
                         Navigator.of(context).push(
                           ThemeSwitcher.buildPageRoute(
-                            builder: (context) => Scaffold(
+                            builder: originalSettingsPageBuilder((context) => Scaffold(
                               body: Markdown(
                                 data: changelog,
                                 physics: const AlwaysScrollableScrollPhysics(
@@ -311,7 +312,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                                     ? SystemUiOverlayStyle.light
                                     : SystemUiOverlayStyle.dark,
                               ),
-                            ),
+                            )),
                           ),
                         );
                       },
@@ -610,7 +611,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                                         child: Text("View Licenses", style: context.theme.textTheme.bodyLarge!.copyWith(color: context.theme.colorScheme.primary)),
                                         onPressed: () {
                                           Navigator.of(context).push(MaterialPageRoute<void>(
-                                            builder: (BuildContext context) => Theme(
+                                            builder: originalSettingsPageBuilder((BuildContext context) => Theme(
                                               data: context.theme,
                                               child: LicensePage(
                                                 applicationName: "BlueBubbles",
@@ -621,7 +622,7 @@ class _AboutPanelState extends OptimizedState<AboutPanel> {
                                                   height: 30,
                                                 ),
                                               ),
-                                            ),
+                                            )),
                                           ));
                                         },
                                       ),

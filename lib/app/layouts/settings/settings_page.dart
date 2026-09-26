@@ -28,6 +28,7 @@ import 'package:bluebubbles/app/layouts/settings/widgets/settings_widgets.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/theming/theming_panel.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/misc/troubleshoot_panel.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/wrappers/tablet_mode_wrapper.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/services.dart';
@@ -43,7 +44,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:universal_io/io.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends StatelessWidget {
   SettingsPage({
     super.key,
     this.initialPage,
@@ -52,10 +53,19 @@ class SettingsPage extends StatefulWidget {
   final Widget? initialPage;
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  Widget build(BuildContext context) => OriginalSettingsTheme(child: _SettingsPage(initialPage: initialPage));
 }
 
-class _SettingsPageState extends OptimizedState<SettingsPage> {
+class _SettingsPage extends StatefulWidget {
+  const _SettingsPage({this.initialPage});
+
+  final Widget? initialPage;
+
+  @override
+  State<_SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends OptimizedState<_SettingsPage> {
   final RxBool uploadingContacts = false.obs;
   final RxnDouble progress = RxnDouble();
   final RxnInt totalSize = RxnInt();
@@ -221,8 +231,7 @@ class _SettingsPageState extends OptimizedState<SettingsPage> {
                                                         width: 3.0),
                                                   )
                                                 : null,
-                                            color: ss.settings.skin.value !=
-                                                    Skins.Material
+                                            color: settingsSkin(context) != Skins.Material
                                                 ? getIndicatorColor(
                                                     socket.state.value)
                                                 : Colors.transparent,
@@ -240,14 +249,10 @@ class _SettingsPageState extends OptimizedState<SettingsPage> {
                                                           ? CupertinoIcons
                                                               .antenna_radiowaves_left_right
                                                           : Icons.router,
-                                                      color: ss.settings.skin
-                                                                  .value !=
-                                                              Skins.Material
+                                                      color: settingsSkin(context) != Skins.Material
                                                           ? Colors.white
                                                           : Colors.grey,
-                                                      size: ss.settings.skin
-                                                                  .value !=
-                                                              Skins.Material
+                                                      size: settingsSkin(context) != Skins.Material
                                                           ? 21
                                                           : 28,
                                                     ),

@@ -35,7 +35,7 @@ class _GradientBackgroundState extends CustomState<GradientBackground, void, Con
 
   @override
   Widget build(BuildContext context) {
-    if (!adjustBackground.value) {
+    if (ss.settings.skin.value == Skins.Light || !adjustBackground.value) {
       return widget.child;
     }
     return MirrorAnimationBuilder<Movie>(

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:bluebubbles/app/components/light/light_message_surface.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/database/models.dart';
@@ -79,7 +80,7 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
   List<Color> getBubbleColors() {
     if (selected && !iOS) return [context.theme.colorScheme.tertiaryContainer, context.theme.colorScheme.tertiaryContainer];
     List<Color> bubbleColors = [context.theme.colorScheme.properSurface, context.theme.colorScheme.properSurface];
-    if (ss.settings.colorfulBubbles.value && !message.isFromMe!) {
+    if (ss.settings.skin.value != Skins.Light && ss.settings.colorfulBubbles.value && !message.isFromMe!) {
       if (message.handle?.color == null) {
         bubbleColors = toColorGradient(message.handle?.address);
       } else {
@@ -110,10 +111,11 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      var translucentMode = controller.cvController?.backgroundPoster.value != null;
+      final isLight = ss.settings.skin.value == Skins.Light;
+      var translucentMode = !isLight && controller.cvController?.backgroundPoster.value != null;
       var child = Container(
         constraints: BoxConstraints(
-          maxWidth: message.isBigEmoji ? ns.width(context) : ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 40 - (message.dateScheduled != null ? 4 : 0),
+          maxWidth: isLight ? ns.width(context) - 36 : message.isBigEmoji ? ns.width(context) : ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 40 - (message.dateScheduled != null ? 4 : 0),
           minHeight: 40 - (message.dateScheduled != null ? 4 : 0),
         ),
         padding: EdgeInsets.symmetric(vertical: 10 - (message.dateScheduled != null ? 4 : 0), horizontal: 15 - (message.dateScheduled != null ? 4 : 0))
@@ -137,9 +139,9 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
             context,
             part,
             message,
-            colorOverride: message.dateScheduled != null ? context.theme.colorScheme.primary :
+            colorOverride: isLight ? (selected ? context.theme.colorScheme.onTertiaryContainer : context.theme.colorScheme.onSurface) : message.dateScheduled != null ? context.theme.colorScheme.primary :
                 selected ? context.theme.colorScheme.onTertiaryContainer
-                : ss.settings.colorfulBubbles.value && !message.isFromMe!
+                : ss.settings.skin.value != Skins.Light && ss.settings.colorfulBubbles.value && !message.isFromMe!
                 ? getBubbleColors().first.oppositeLightenOrDarken(75) : null,
             hideBodyText: widget.subjectOnly,
           ),
@@ -147,9 +149,9 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
             context,
             part,
             message,
-            colorOverride: message.dateScheduled != null ? context.theme.colorScheme.primary :
+            colorOverride: isLight ? (selected ? context.theme.colorScheme.onTertiaryContainer : context.theme.colorScheme.onSurface) : message.dateScheduled != null ? context.theme.colorScheme.primary :
               selected ? context.theme.colorScheme.onTertiaryContainer
-                : ss.settings.colorfulBubbles.value && !message.isFromMe!
+                : ss.settings.skin.value != Skins.Light && ss.settings.colorfulBubbles.value && !message.isFromMe!
                 ? getBubbleColors().first.oppositeLightenOrDarken(75) : null,
             hideBodyText: widget.subjectOnly,
           ),
@@ -179,6 +181,8 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
                     );
                   },
                   child: RichText(
+                    textAlign: isLight ? (message.isFromMe! ? TextAlign.right : TextAlign.left) : TextAlign.start,
+                    textScaler: ss.settings.skin.value == Skins.Light ? MediaQuery.textScalerOf(context) : TextScaler.noScaling,
                     text: TextSpan(
                       children: snapshot.data!,
                     ),
@@ -190,6 +194,8 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
                 child: Padding(
                   padding: message.fullText.length == 1 ? const EdgeInsets.only(left: 3, right: 3) : EdgeInsets.zero,
                   child: RichText(
+                    textAlign: isLight ? (message.isFromMe! ? TextAlign.right : TextAlign.left) : TextAlign.start,
+                    textScaler: ss.settings.skin.value == Skins.Light ? MediaQuery.textScalerOf(context) : TextScaler.noScaling,
                     text: TextSpan(
                       children: snapshot.data!,
                     ),
@@ -201,6 +207,14 @@ class _TextBubbleState extends CustomState<TextBubble, void, MessageWidgetContro
           }
         ),
       );
+      if (isLight) {
+        return LightMessageSurface(
+          isFromMe: message.isFromMe!,
+          selected: selected,
+          constraints: child.constraints,
+          child: child.child!,
+        );
+      }
       if (translucentMode) {
         return BackdropFilter(
           filter: ImageFilter.compose(

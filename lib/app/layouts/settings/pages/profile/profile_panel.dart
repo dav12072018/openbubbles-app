@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/profile/posterkit.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/profile/profile_scaffold.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/theming/avatar/avatar_crop.dart';
@@ -164,7 +165,7 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
           }
           showDialog(
             context: Get.context!,
-            builder: (BuildContext context) {
+            builder: originalSettingsPageBuilder((BuildContext context) {
               return AlertDialog(
                 backgroundColor: context.theme.colorScheme.properSurface,
                 title: Text(
@@ -181,7 +182,7 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
                   ),
                 ),
               );
-            }
+            })
           );
 
           api.SimplifiedIncomingCallPoster? poster;
@@ -312,10 +313,10 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
   void updatePhoto() async {
     Navigator.of(context).push(
       ThemeSwitcher.buildPageRoute(
-        builder: (context) => AvatarCrop(cropped: () {
+        builder: originalSettingsPageBuilder((context) => AvatarCrop(cropped: () {
           cloudKitRecordDirty = true;
           profileDirty = true;
-        },),
+        },)),
       ),
     );
   }

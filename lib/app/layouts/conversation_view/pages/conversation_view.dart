@@ -1,4 +1,5 @@
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/header/cupertino_header.dart';
+import 'package:bluebubbles/app/components/light/light_header.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/header/material_header.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/text_field/conversation_text_field.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/profile/posterkit.dart';
@@ -62,6 +63,18 @@ class ConversationViewState extends OptimizedState<ConversationView> {
     super.dispose();
   }
 
+  // Use the actual body height after Scaffold consumes keyboard insets. Keep
+  // the composer non-flex so the transcript gets all of its unused space.
+  Widget _constrainComposer(Widget child, BoxConstraints constraints) {
+    if (ss.settings.skin.value != Skins.Light) return child;
+    // The body extends behind the app bar, which must remain visible too.
+    final availableHeight = (constraints.maxHeight - lightToolbarHeight).clamp(0.0, double.infinity);
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: availableHeight * 0.65),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -86,7 +99,7 @@ class ConversationViewState extends OptimizedState<ConversationView> {
             onSurface: ss.settings.monetTheming.value == Monet.full
                 ? null
                 : (context.theme.extensions[BubbleColors] as BubbleColors?)?.onReceivedBubbleColor,
-            outline: controller.backgroundPoster.value != null ? Colors.white : null,
+            outline: ss.settings.skin.value != Skins.Light && controller.backgroundPoster.value != null ? Colors.white : null,
           ),
         ),
         child: PopScope(
@@ -117,7 +130,9 @@ class ConversationViewState extends OptimizedState<ConversationView> {
               backgroundColor: ss.settings.windowEffect.value != WindowEffect.disabled ? Colors.transparent : context.theme.colorScheme.background,
               extendBodyBehindAppBar: true,
               appBar: PreferredSize(
-                  preferredSize: Size(ns.width(context), ((kIsDesktop ? (!iOS ? 25 : 5) : 0) + 90 * (iOS ? ss.settings.avatarScale.value : 0) + (!iOS ? kToolbarHeight : 0) + (controller.suggestedContact.value != null || controller.suggestShare.value ? 68 : 0))),
+                  preferredSize: ss.settings.skin.value == Skins.Light
+                      ? MaterialHeader(controller: controller).preferredSize
+                      : Size(ns.width(context), ((kIsDesktop ? (!iOS ? 25 : 5) : 0) + 90 * (iOS ? ss.settings.avatarScale.value : 0) + (!iOS ? kToolbarHeight : 0) + (controller.suggestedContact.value != null || controller.suggestShare.value ? 68 : 0))),
                   child: iOS
                   ? CupertinoHeader(controller: controller)
                   : MaterialHeader(controller: controller) as PreferredSizeWidget),
@@ -146,10 +161,10 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        if (controller.backgroundPoster.value != null)
+                        if (ss.settings.skin.value != Skins.Light && controller.backgroundPoster.value != null)
                         ImagePoster(poster: controller.backgroundPoster.value!.poster, images: controller.images),
-                        const Positioned.fill(child: ScreenEffectsWidget()),
-                        Column(
+                        if (ss.settings.skin.value != Skins.Light) const Positioned.fill(child: ScreenEffectsWidget()),
+                        LayoutBuilder(builder: (context, constraints) => Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Expanded(
@@ -208,10 +223,11 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                                 ],
                               ),
                             ),
-                            Stack(
+                            _constrainComposer(Stack(
                               children: [
                                 Align(
                                   alignment: Alignment.bottomCenter,
+                                  heightFactor: ss.settings.skin.value == Skins.Light ? 1 : null,
                                   child: GestureDetector(
                                     onPanUpdate: (details) {
                                       if (!mounted) return;
@@ -232,9 +248,9 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                                   ),
                                 )
                               ]
-                            ),
+                            ), constraints),
                           ],
-                        ),
+                        )),
                       ],
                     ),
                   ),

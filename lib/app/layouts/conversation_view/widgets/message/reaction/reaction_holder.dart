@@ -2,6 +2,7 @@ import 'package:bluebubbles/app/layouts/conversation_view/widgets/message/reacti
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/database/models.dart';
+import 'package:bluebubbles/services/services.dart';
 import 'package:collection/collection.dart';
 import 'package:defer_pointer/defer_pointer.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,23 @@ class _ReactionHolderState extends OptimizedState<ReactionHolder> {
     // If the reactions are empty, return nothing
     if (reactions.isEmpty) {
       return const SizedBox.shrink();
+    }
+
+    if (ss.settings.skin.value == Skins.Light) {
+      return Wrap(
+        alignment: widget.message.isFromMe! ? WrapAlignment.end : WrapAlignment.start,
+        spacing: 4,
+        runSpacing: 4,
+        children: [
+          for (final reaction in reactions)
+            ReactionWidget(
+              key: ValueKey(reaction.guid),
+              message: widget.message,
+              reaction: reaction,
+              reactions: reactions.toList(),
+            ),
+        ],
+      );
     }
 
     return SizedBox(

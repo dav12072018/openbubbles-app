@@ -59,7 +59,7 @@ class SettingsOptions<T extends Object> extends StatelessWidget {
       );
     }
     Color surfaceColor = context.theme.colorScheme.properSurface;
-    if (ss.settings.skin.value == Skins.Material
+    if (settingsSkin(context) == Skins.Material
         && surfaceColor.computeDifference(context.theme.colorScheme.background) < 15) {
       surfaceColor = context.theme.colorScheme.surfaceVariant;
     }

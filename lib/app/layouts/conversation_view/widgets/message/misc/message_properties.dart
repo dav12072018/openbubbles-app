@@ -138,6 +138,7 @@ class _MessagePropertiesState extends CustomState<MessageProperties, void, Messa
             children: intersperse(const TextSpan(text: " • "), props).toList(),
           ),
           style: context.theme.textTheme.labelSmall!.copyWith(color: context.theme.colorScheme.primary, fontWeight: FontWeight.bold),
+          textAlign: ss.settings.skin.value == Skins.Light ? (message.isFromMe! ? TextAlign.right : TextAlign.left) : TextAlign.start,
         ),
       ) : const SizedBox.shrink(),
     );

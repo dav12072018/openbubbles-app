@@ -100,9 +100,13 @@ class MaterialOverflowMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<int>(
-      color: context.theme.colorScheme.properSurface.lightenOrDarken(ss.settings.skin.value == Skins.Samsung ? 20 : 0)
+      color: ss.settings.skin.value == Skins.Light
+          ? context.theme.scaffoldBackgroundColor
+          : context.theme.colorScheme.properSurface.lightenOrDarken(ss.settings.skin.value == Skins.Samsung ? 20 : 0)
           .withOpacity(ss.settings.windowEffect.value != WindowEffect.disabled ? 0.9 : 1),
-      shape: ss.settings.skin.value != Skins.Material ? const RoundedRectangleBorder(
+      shape: ss.settings.skin.value == Skins.Light
+          ? RoundedRectangleBorder(side: BorderSide(color: context.theme.colorScheme.onSurface, width: 0.5))
+          : ss.settings.skin.value != Skins.Material ? const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(20.0),
         ),
@@ -255,6 +259,13 @@ class MaterialOverflowMenu extends StatelessWidget {
               Icons.more_vert,
               color: context.theme.colorScheme.properOnSurface,
               size: 25,
+            ),
+            lightSkin: Center(
+              child: Text('MENU', style: TextStyle(
+                color: context.theme.colorScheme.onSurface,
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              )),
             ),
           ),
     );

@@ -20,6 +20,9 @@ class TailClipper extends CustomClipper<Path>{
     final path = Path();
     final double start = isFromMe ? 0 : 10;
     final double end = isFromMe ? size.width - 10 : size.width;
+    if (ss.settings.skin.value == Skins.Light) {
+      return path..addRect(Offset.zero & size);
+    }
     path.moveTo(start, 20);
     if (!isFromMe && (showTail && ss.settings.skin.value == Skins.iOS)) {
       path.lineTo(start, size.height - 10);

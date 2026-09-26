@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:bluebubbles/app/components/light/light_theme.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:bluebubbles/app/components/custom/custom_error_box.dart';
@@ -271,6 +272,19 @@ class DesktopWindowListener extends WindowListener {
   }
 }
 
+ThemeData _lightPhoneTheme(Brightness brightness) {
+  final theme = createLightPhoneTheme(brightness);
+  final colors = theme.colorScheme;
+  return theme.copyWith(extensions: [
+    BubbleColors(
+      iMessageBubbleColor: colors.primary, oniMessageBubbleColor: colors.onPrimary,
+      smsBubbleColor: colors.primary, onSmsBubbleColor: colors.onPrimary,
+      receivedBubbleColor: colors.surface, onReceivedBubbleColor: colors.onSurface,
+    ),
+    BubbleText(bubbleText: lightMessageTextStyle.copyWith(color: colors.onSurface)),
+  ]);
+}
+
 class Main extends StatelessWidget {
   final ThemeData darkTheme;
   final ThemeData lightTheme;
@@ -284,12 +298,13 @@ class Main extends StatelessWidget {
           textSelectionTheme: TextSelectionThemeData(selectionColor: lightTheme.colorScheme.primary)),
       dark:
           darkTheme.copyWith(textSelectionTheme: TextSelectionThemeData(selectionColor: darkTheme.colorScheme.primary)),
-      initial: AdaptiveThemeMode.system,
-      builder: (theme, darkTheme) => GetMaterialApp(
+      initial: Platform.isAndroid && ss.settings.skin.value == Skins.Light
+          ? AdaptiveThemeMode.dark : AdaptiveThemeMode.system,
+      builder: (theme, darkTheme) => Obx(() => GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'BlueBubbles',
-        theme: theme.copyWith(appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0)),
-        darkTheme: darkTheme.copyWith(appBarTheme: darkTheme.appBarTheme.copyWith(elevation: 0.0)),
+        title: 'OpenBubbles Light',
+        theme: ss.settings.skin.value == Skins.Light ? _lightPhoneTheme(theme.brightness) : theme.copyWith(appBarTheme: theme.appBarTheme.copyWith(elevation: 0.0)),
+        darkTheme: ss.settings.skin.value == Skins.Light ? _lightPhoneTheme(darkTheme.brightness) : darkTheme.copyWith(appBarTheme: darkTheme.appBarTheme.copyWith(elevation: 0.0)),
         navigatorKey: ns.key,
         scrollBehavior: const MaterialScrollBehavior().copyWith(
           // Specifically for GNU/Linux & Android-x86 family, where touch isn't interpreted as a drag device by Flutter apparently.
@@ -425,8 +440,8 @@ class Main extends StatelessWidget {
             ),
           ),
         ),
-        defaultTransition: Transition.cupertino,
-      ),
+        defaultTransition: ss.settings.skin.value == Skins.Light ? Transition.noTransition : Transition.cupertino,
+      )),
     );
   }
 }

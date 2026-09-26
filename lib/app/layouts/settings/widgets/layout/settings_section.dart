@@ -21,7 +21,7 @@ class SettingsSection extends StatelessWidget {
         borderRadius:
         ss.settings.skin.value == Skins.Samsung ? BorderRadius.circular(25) :
         ss.settings.skin.value == Skins.iOS ? BorderRadius.circular(10) : BorderRadius.circular(0),
-        clipBehavior: ss.settings.skin.value != Skins.Material ? Clip.antiAlias : Clip.none,
+        clipBehavior: settingsSkin(context) != Skins.Material ? Clip.antiAlias : Clip.none,
         child: Container(
           color: ss.settings.skin.value == Skins.iOS ? null : backgroundColor,
           decoration: ss.settings.skin.value == Skins.iOS ? BoxDecoration(

@@ -108,11 +108,32 @@ class BubbleText extends ThemeExtension<BubbleText> {
   }
 }
 
+/// Marks the original Material presentation of Settings within the Light skin.
+/// As a ThemeExtension it is also captured by ordinary dialogs and popup routes.
+@immutable
+class OriginalSettingsMaterial extends ThemeExtension<OriginalSettingsMaterial> {
+  const OriginalSettingsMaterial();
+
+  @override
+  OriginalSettingsMaterial copyWith() => this;
+
+  @override
+  OriginalSettingsMaterial lerp(ThemeExtension<OriginalSettingsMaterial>? other, double t) => this;
+}
+
+/// Resolves presentation locally without changing the user's saved skin.
+Skins settingsSkin(BuildContext context) {
+  final skin = ss.settings.skin.value;
+  return skin == Skins.Light && Theme.of(context).extension<OriginalSettingsMaterial>() != null
+      ? Skins.Material
+      : skin;
+}
+
 /// Mixin to provide settings widgets with easy access to the commonly used
 /// theming values
 mixin ThemeHelpers<T extends StatefulWidget> on State<T> {
   // Samsung theme should always use the background color as the "header" color
-  bool get reverseMapping => ss.settings.skin.value == Skins.Material && ts.inDarkMode(context);
+  bool get reverseMapping => settingsSkin(context) == Skins.Material && ts.inDarkMode(context);
 
   /// iOS skin [ListTile] subtitle [TextStyle]s
   TextStyle get iosSubtitle => context.theme.textTheme.labelLarge!.copyWith(
@@ -154,7 +175,7 @@ mixin ThemeHelpers<T extends StatefulWidget> on State<T> {
 
   bool get iOS => ss.settings.skin.value == Skins.iOS;
 
-  bool get material => ss.settings.skin.value == Skins.Material;
+  bool get material => settingsSkin(context) == Skins.Material;
 
   bool get samsung => ss.settings.skin.value == Skins.Samsung;
 
@@ -175,13 +196,13 @@ extension ColorSchemeHelpers on ColorScheme {
 
   Color get onSmsBubble => iMessageBubble == primary ? onPrimaryContainer : onPrimary;
 
-  Color bubble(BuildContext context, bool iMessage) => ss.settings.monetTheming.value != Monet.none
+  Color bubble(BuildContext context, bool iMessage) => ss.settings.skin.value != Skins.Light && ss.settings.monetTheming.value != Monet.none
       ? (iMessage ? iMessageBubble : smsBubble)
       : iMessage
           ? (context.theme.extensions[BubbleColors] as BubbleColors?)?.iMessageBubbleColor ?? iMessageBubble
           : (context.theme.extensions[BubbleColors] as BubbleColors?)?.smsBubbleColor ?? smsBubble;
 
-  Color onBubble(BuildContext context, bool iMessage) => ss.settings.monetTheming.value != Monet.none
+  Color onBubble(BuildContext context, bool iMessage) => ss.settings.skin.value != Skins.Light && ss.settings.monetTheming.value != Monet.none
       ? (iMessage ? oniMessageBubble : onSmsBubble)
       : iMessage
           ? (context.theme.extensions[BubbleColors] as BubbleColors?)?.oniMessageBubbleColor ?? oniMessageBubble

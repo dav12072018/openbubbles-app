@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
+import 'package:bluebubbles/app/components/light/light_header.dart';
 import 'package:bluebubbles/app/layouts/conversation_details/conversation_details.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/header/header_widgets.dart';
 import 'package:bluebubbles/app/components/avatars/contact_avatar_group_widget.dart';
@@ -41,12 +42,17 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
           ? SystemUiOverlayStyle.light
           : SystemUiOverlayStyle.dark,
       automaticallyImplyLeading: false,
-      toolbarHeight: (kIsDesktop ? 25 : 0) + kToolbarHeight,
-      leadingWidth: 30,
+      toolbarHeight: ss.settings.skin.value == Skins.Light ? lightToolbarHeight : (kIsDesktop ? 25 : 0) + kToolbarHeight,
+      centerTitle: ss.settings.skin.value == Skins.Light,
+      titleSpacing: ss.settings.skin.value == Skins.Light ? 0 : null,
+      leadingWidth: ss.settings.skin.value == Skins.Light ? 48 : 30,
       leading: Padding(
-        padding: EdgeInsets.only(left: 5.0, top: kIsDesktop ? 20 : 0),
+        padding: EdgeInsets.only(left: 5.0, top: ss.settings.skin.value != Skins.Light && kIsDesktop ? 20 : 0),
         child: BackButton(
           color: context.theme.colorScheme.onBackground,
+          icon: ss.settings.skin.value == Skins.Light ? LightBackChevron(color: context.theme.colorScheme.onBackground) : null,
+          iconSize: ss.settings.skin.value == Skins.Light ? 80 / 3 : null,
+          tooltip: ss.settings.skin.value == Skins.Light ? (controller.inSelectMode.value ? 'Cancel selection' : 'Back') : null,
           focusNode: controller.headerBackFocusNode,
           onPressed: () {
             if (controller.inSelectMode.value) {
@@ -64,7 +70,7 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       title: Padding(
-        padding: EdgeInsets.only(top: kIsDesktop ? 20 : 0),
+        padding: EdgeInsets.only(top: ss.settings.skin.value != Skins.Light && kIsDesktop ? 20 : 0),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
           onTap: controller.chat.isGroup ? () {
@@ -89,32 +95,33 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
             }
           },
           child: Padding(
-            padding: const EdgeInsets.all(5.0),
+            padding: ss.settings.skin.value == Skins.Light ? const EdgeInsets.symmetric(horizontal: 5.0) : const EdgeInsets.all(5.0),
             child: _ChatIconAndTitle(parentController: controller),
           ),
         ),
       ),
       actions: [
         Padding(
-          padding: EdgeInsets.only(top: kIsDesktop ? 20 : 0),
+          padding: EdgeInsets.only(top: ss.settings.skin.value != Skins.Light && kIsDesktop ? 20 : 0),
           child: ManualMark(controller: controller),
         ),
-        if (Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isPhoneNumber)
+        if (ss.settings.skin.value != Skins.Light && Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isPhoneNumber)
           IconButton(
             icon: Icon(Icons.call_outlined, color: context.theme.colorScheme.onBackground),
             onPressed: () {
               launchUrl(Uri(scheme: "tel", path: controller.chat.participants.first.address));
             },
           ),
-        if (Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isEmail)
+        if (ss.settings.skin.value != Skins.Light && Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isEmail)
           IconButton(
             icon: Icon(Icons.mail_outlined, color: context.theme.colorScheme.onBackground),
             onPressed: () {
               launchUrl(Uri(scheme: "mailto", path: controller.chat.participants.first.address));
             },
           ),
-        FaceTimeBtn(controller: controller),
-        Padding(
+        if (ss.settings.skin.value != Skins.Light) FaceTimeBtn(controller: controller),
+        if (ss.settings.skin.value == Skins.Light) const SizedBox(width: 48),
+        if (ss.settings.skin.value != Skins.Light) Padding(
           padding: EdgeInsets.only(top: kIsDesktop ? 20 : 0),
           child: PopupMenuButton<int>(
             color: context.theme.colorScheme.properSurface,
@@ -409,7 +416,9 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kIsDesktop ? 90 : kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(ss.settings.skin.value == Skins.Light
+      ? lightToolbarHeight + (controller.suggestedContact.value != null || controller.suggestShare.value ? 68 : 0)
+      : kIsDesktop ? 90 : kToolbarHeight);
 }
 
 class _ChatIconAndTitle extends CustomStateful<ConversationViewController> {
@@ -502,7 +511,7 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
+        if (ss.settings.skin.value != Skins.Light) Padding(
           padding: const EdgeInsets.only(right: 12.5),
           child: IgnorePointer(
             ignoring: true,
@@ -514,7 +523,8 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
         ),
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: ss.settings.skin.value == Skins.Light ? MainAxisSize.min : MainAxisSize.max,
+            crossAxisAlignment: ss.settings.skin.value == Skins.Light ? CrossAxisAlignment.center : CrossAxisAlignment.start,
             children: [
               Obx(() {
                 String _title = title;
@@ -525,7 +535,9 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
                 }
                 return Text(
                   _title,
-                  style: context.theme.textTheme.titleLarge!.apply(color: context.theme.colorScheme.onBackground, fontSizeFactor: 0.85),
+                  style: ss.settings.skin.value == Skins.Light
+                      ? lightHeaderTitleStyle.copyWith(color: context.theme.colorScheme.onBackground)
+                      : context.theme.textTheme.titleLarge!.apply(color: context.theme.colorScheme.onBackground, fontSizeFactor: 0.85),
                   maxLines: 1,
                   overflow: TextOverflow.fade,
                 );

@@ -20,8 +20,11 @@ class BackButton extends StatelessWidget {
   final bool Function()? onPressed;
   final Color? color;
   final FocusNode? focusNode;
+  final Widget? icon;
+  final String? tooltip;
+  final double? iconSize;
 
-  const BackButton({this.color, this.onPressed, this.focusNode});
+  const BackButton({this.color, this.onPressed, this.focusNode, this.icon, this.tooltip, this.iconSize});
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +55,12 @@ class BackButton extends StatelessWidget {
             },
             child: IconButton(
               focusNode: focusNode,
-              icon: Obx(() => Icon(
-                ss.settings.skin.value != Skins.Material ? CupertinoIcons.back : Icons.arrow_back,
+              tooltip: tooltip,
+              icon: icon ?? Obx(() => Icon(
+                settingsSkin(context) != Skins.Material ? CupertinoIcons.back : Icons.arrow_back,
                 color: color ?? context.theme.colorScheme.primary,
               )),
-              iconSize: ss.settings.skin.value != Skins.Material ? 30 : 24,
+              iconSize: iconSize ?? (settingsSkin(context) != Skins.Material ? 30 : 24),
               onPressed: () {
                 if (kIsDesktop) return;
                 goBack();
@@ -88,10 +92,10 @@ Widget buildBackButton(BuildContext context, {EdgeInsets padding = EdgeInsets.ze
           }
         },
         child: IconButton(
-          iconSize: iconSize ?? (ss.settings.skin.value != Skins.Material ? 30 : 24),
+          iconSize: iconSize ?? (settingsSkin(context) != Skins.Material ? 30 : 24),
           icon: skin != null
               ? Icon(skin != Skins.Material ? CupertinoIcons.back : Icons.arrow_back, color: context.theme.colorScheme.primary)
-              : Obx(() => Icon(ss.settings.skin.value != Skins.Material ? CupertinoIcons.back : Icons.arrow_back,
+              : Obx(() => Icon(settingsSkin(context) != Skins.Material ? CupertinoIcons.back : Icons.arrow_back,
                   color: context.theme.colorScheme.primary)),
           onPressed: () {
             if (kIsDesktop) return;

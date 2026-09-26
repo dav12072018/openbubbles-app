@@ -8,6 +8,7 @@ import 'package:bluebubbles/app/layouts/conversation_list/widgets/header/samsung
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/initial_widget_right.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/conversation_tile.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/material_conversation_tile.dart';
+import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/light_conversation_tile.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/samsung_conversation_tile.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/pages/conversation_view.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
@@ -21,6 +22,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/pages/cupertino_conversation_list.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/pages/material_conversation_list.dart';
+import 'package:bluebubbles/app/layouts/conversation_list/pages/light_conversation_list.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/pages/samsung_conversation_list.dart';
 import 'package:bluebubbles/app/wrappers/theme_switcher.dart';
 import 'package:flutter/cupertino.dart';
@@ -60,6 +62,8 @@ class ConversationListController extends StatefulController {
     } else if (ss.settings.skin.value == Skins.Samsung) {
       updateWidgets<SamsungFooter>(null);
       updateWidgets<ExpandedHeaderText>(null);
+    } else if (ss.settings.skin.value == Skins.Light) {
+      updateWidgets<LightConversationList>(null);
     }
   }
 
@@ -80,6 +84,7 @@ class ConversationListController extends StatefulController {
       selectedChats.removeWhere((element) => element.guid == c.guid);
       Get.find<ConversationTileController>(tag: c.guid).updateWidgets<MaterialConversationTile>(null);
       Get.find<ConversationTileController>(tag: c.guid).updateWidgets<SamsungConversationTile>(null);
+      Get.find<ConversationTileController>(tag: c.guid).updateWidgets<LightConversationTile>(null);
     }
     updateSelectedChats();
   }
@@ -202,6 +207,7 @@ class _ConversationListState extends CustomState<ConversationList, void, Convers
       iOSSkin: CupertinoConversationList(parentController: controller),
       materialSkin: MaterialConversationList(parentController: controller),
       samsungSkin: SamsungConversationList(parentController: controller),
+      lightSkin: LightConversationList(parentController: controller),
     );
 
     if (controller.showArchivedChats || controller.showUnknownSenders || controller.showDeletedMessages) return child;

@@ -32,7 +32,7 @@ class SettingsLeadingIcon extends StatelessWidget {
                 width: 3.0
             ),
           ) : null,
-          color: ss.settings.skin.value != Skins.Material
+          color: (ss.settings.skin.value != Skins.Material && ss.settings.skin.value != Skins.Light)
               ? containerColor ?? context.theme.colorScheme.outline
               : Colors.transparent,
           borderRadius: ss.settings.skin.value == Skins.iOS
@@ -42,8 +42,8 @@ class SettingsLeadingIcon extends StatelessWidget {
             height: boxSize ?? 30,
             child: Center(
               child: Icon(ss.settings.skin.value == Skins.iOS ? iosIcon : materialIcon,
-                  color: ss.settings.skin.value != Skins.Material ? Colors.white : context.theme.colorScheme.outline,
-                  size: ss.settings.skin.value != Skins.Material ? iconSize ?? 21 : iconSizeMaterial ?? 28),
+                  color: (ss.settings.skin.value != Skins.Material && ss.settings.skin.value != Skins.Light) ? Colors.white : context.theme.colorScheme.outline,
+                  size: (ss.settings.skin.value != Skins.Material && ss.settings.skin.value != Skins.Light) ? iconSize ?? 21 : iconSizeMaterial ?? 28),
             ),
           ),
         )),

@@ -76,8 +76,13 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
       && !message.guid!.startsWith("error");
   bool get showSender => !message.isGroupEvent && (!message.sameSender(olderMessage) || (olderMessage?.isGroupEvent ?? false)
       || (olderMessage == null || !message.dateCreated!.isWithin(olderMessage!.dateCreated!, minutes: 30)));
-  bool get showAvatar => chat.isGroup;
+  bool get isLight => ss.settings.skin.value == Skins.Light;
+  bool get showAvatar => !isLight && chat.isGroup;
   bool isEditing(int part) => message.isFromMe! && widget.cvController.editing.firstWhereOrNull((e2) => e2.item1.guid == message.guid! && e2.item2.part == part) != null;
+
+  // The plain transcript can use the full row, including when selection or
+  // error controls reduce the available width.
+  Widget lightMessageContent(Widget child) => isLight ? Flexible(child: child) : child;
 
   List<MessagePart> messageParts = [];
   List<RxDouble> replyOffsets = [];
@@ -207,7 +212,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
     }
     return AnimatedPadding(
       duration: const Duration(milliseconds: 100),
-      padding: message.guid!.contains("temp") ? EdgeInsets.zero : EdgeInsets.only(
+      padding: isLight ? const EdgeInsets.symmetric(horizontal: 13, vertical: 6) : message.guid!.contains("temp") ? EdgeInsets.zero : EdgeInsets.only(
         top: olderMessage != null && !message.sameSender(olderMessage!) ? 5.0 : 0,
         bottom: newerMessage != null && !message.sameSender(newerMessage!) ? 5.0 : 0,
       ),
@@ -236,7 +241,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                           // add previous edits if needed
                           if (e.isEdited)
                             Padding(
-                              padding: showAvatar || ss.settings.alwaysShowAvatars.value
+                              padding: showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)
                                   ? EdgeInsets.only(left: 35.0 * ss.settings.avatarScale.value) : EdgeInsets.zero,
                               child: Obx(() => AnimatedSize(
                                 duration: const Duration(milliseconds: 250),
@@ -275,7 +280,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                               && replyTo != null
                               && getActiveMwc(replyTo!.guid!) != null)
                             Padding(
-                              padding: EdgeInsets.only(left: (showAvatar || ss.settings.alwaysShowAvatars.value) && replyTo!.isFromMe! ? 35 : 0),
+                              padding: EdgeInsets.only(left: (showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)) && replyTo!.isFromMe! ? 35 : 0),
                               child: DecoratedBox(
                                 decoration: replyTo!.isFromMe == message.isFromMe ? ReplyLineDecoration(
                                   isFromMe: message.isFromMe!,
@@ -290,42 +295,70 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                   child: ReplyBubble(
                                     parentController: getActiveMwc(replyTo!.guid!)!,
                                     part: replyTo!.guid! == message.threadOriginatorGuid ? message.normalizedThreadPart : 0,
-                                    showAvatar: (chat.isGroup || ss.settings.alwaysShowAvatars.value || !iOS) && !replyTo!.isFromMe!,
+                                    showAvatar: (chat.isGroup || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value) || !iOS) && !replyTo!.isFromMe!,
                                     cvController: widget.cvController,
                                   ),
                                 ),
                               ),
                             ),
                           // show sender, if needed
-                          if (chat.isGroup
-                              && !message.isFromMe!
-                              && showSender
+                          if (!message.isGroupEvent
+                              && (isLight
+                                  ? chat.isGroup
+                                  : chat.isGroup && !message.isFromMe! && showSender)
                               && e.part == (messageParts.firstWhereOrNull((e) => !e.isUnsent)?.part))
                             Padding(
-                              padding: showAvatar || ss.settings.alwaysShowAvatars.value
+                              padding: showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)
                                   ? EdgeInsets.only(left: 35.0 * ss.settings.avatarScale.value) : EdgeInsets.zero,
                               child: MessageSender(olderMessage: olderMessage, message: message),
                             ),
-                          // add a box to account for height of reactions
+                          // Plain messages give reactions their own row, so
+                          // badges cannot overlap text or escape the gutters.
                           if ((messageParts.length == 1 && reactions.isNotEmpty) || reactionsForPart(e.part).isNotEmpty)
-                            const SizedBox(height: 12.5),
+                            isLight
+                                ? Padding(
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: Obx(() => GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
+                                      onTap: widget.cvController.inSelectMode.value ? () {
+                                        if (widget.cvController.isSelected(message.guid!)) {
+                                          widget.cvController.selected.remove(message);
+                                        } else {
+                                          widget.cvController.selected.add(message);
+                                        }
+                                      } : null,
+                                      child: IgnorePointer(
+                                        ignoring: widget.cvController.inSelectMode.value,
+                                        child: ReactionHolder(
+                                          reactions: messageParts.length == 1 ? reactions : reactionsForPart(e.part),
+                                          message: message,
+                                        ),
+                                      ),
+                                    )),
+                                  )
+                                : const SizedBox(height: 12.5),
                           if (!iOS && index == 0 && !widget.isReplyThread
                               && olderMessage != null
                               && message.threadOriginatorGuid != null
                               && replyTo != null
                               && getActiveMwc(replyTo!.guid!) != null)
                             Padding(
-                              padding: showAvatar || ss.settings.alwaysShowAvatars.value
+                              padding: showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)
                                   ? const EdgeInsets.only(left: 45.0, right: 10) : const EdgeInsets.symmetric(horizontal: 10),
                               child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(25),
-                                  border: Border.fromBorderSide(BorderSide(color: context.theme.colorScheme.properSurface)),
-                                ),
+                                decoration: isLight
+                                    ? BoxDecoration(border: message.isFromMe!
+                                        ? Border(right: BorderSide(color: context.theme.colorScheme.outlineVariant))
+                                        : Border(left: BorderSide(color: context.theme.colorScheme.outlineVariant)))
+                                    : BoxDecoration(
+                                        borderRadius: BorderRadius.circular(25),
+                                        border: Border.fromBorderSide(BorderSide(color: context.theme.colorScheme.properSurface)),
+                                      ),
                                 child: ReplyBubble(
+                                  textAlign: isLight ? (message.isFromMe! ? TextAlign.right : TextAlign.left) : TextAlign.start,
                                   parentController: getActiveMwc(replyTo!.guid!)!,
                                   part: replyTo!.guid! == message.threadOriginatorGuid ? message.normalizedThreadPart : 0,
-                                  showAvatar: (chat.isGroup || ss.settings.alwaysShowAvatars.value || !iOS)
+                                  showAvatar: (chat.isGroup || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value) || !iOS)
                                       && !replyTo!.isFromMe!,
                                   cvController: widget.cvController,
                                 ),
@@ -337,7 +370,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                               // avatar, if needed
                               if (message.showTail(newerMessage)
                                   && e.part == controller.parts.length - 1
-                                  && (showAvatar || ss.settings.alwaysShowAvatars.value)
+                                  && (showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value))
                                   && !message.isFromMe! && !message.isGroupEvent)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 5.0),
@@ -349,7 +382,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                   ),
                                 ),
                               Padding(
-                                padding: (showAvatar || ss.settings.alwaysShowAvatars.value) && !(message.isGroupEvent || e.isUnsent)
+                                padding: (showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)) && !(message.isGroupEvent || e.isUnsent)
                                     ? EdgeInsets.only(left: 35.0 * ss.settings.avatarScale.value) : EdgeInsets.zero,
                                 child: DecoratedBox(
                                   decoration: iOS && !widget.isReplyThread && ((index == 0 && message.threadOriginatorGuid != null && olderMessage != null)
@@ -369,7 +402,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                       } else {
                                         widget.cvController.selected.add(message);
                                       }
-                                    } : kIsDesktop || kIsWeb || iOS || material ? () => tapped.value = !tapped.value : null,
+                                    } : kIsDesktop || kIsWeb || iOS || material || ss.settings.skin.value == Skins.Light ? () => tapped.value = !tapped.value : null,
                                     child: IgnorePointer(
                                       ignoring: widget.cvController.inSelectMode.value,
                                       child: Container(
@@ -393,7 +426,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                               ),
                                             // otherwise show content
                                             if (!message.isGroupEvent && !e.isUnsent)
-                                              Column(
+                                              lightMessageContent(Column(
                                                 crossAxisAlignment: message.isFromMe! ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                                 children: [
                                                   // interactive messages may have subjects, so render them here
@@ -503,7 +536,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                                           color: Colors.transparent,
                                                                           child: Container(
                                                                             decoration: BoxDecoration(
-                                                                              color: !message.isBigEmoji
+                                                                              color: isLight ? context.theme.scaffoldBackgroundColor : !message.isBigEmoji
                                                                                   ? context.theme.colorScheme.primary
                                                                                   : context.theme.colorScheme.background,
                                                                             ),
@@ -542,6 +575,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                                               child: CallbackShortcuts(
                                                                                 bindings: editStuff.item3.getShortcuts(),
                                                                                 child: TextField(
+                                                                                textAlign: isLight ? TextAlign.right : TextAlign.start,
                                                                                 textCapitalization: TextCapitalization.sentences,
                                                                                 autocorrect: true,
                                                                                 controller: editStuff.item3,
@@ -549,7 +583,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                                                 scrollPhysics: const CustomBouncingScrollPhysics(),
                                                                                 style: context.theme.extension<BubbleText>()!.bubbleText.apply(
                                                                                   fontSizeFactor: message.isBigEmoji ? 3 : 1,
-                                                                                  color: context.theme.colorScheme.onPrimary,
+                                                                                  color: isLight ? context.theme.colorScheme.onSurface : context.theme.colorScheme.onPrimary,
                                                                                 ),
                                                                                 keyboardType: TextInputType.multiline,
                                                                                 maxLines: 14,
@@ -560,7 +594,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                                                 textInputAction: ss.settings.sendWithReturn.value && !kIsWeb && !kIsDesktop
                                                                                     ? TextInputAction.send
                                                                                     : TextInputAction.newline,
-                                                                                cursorColor: context.theme.colorScheme.onPrimary,
+                                                                                cursorColor: isLight ? context.theme.colorScheme.onSurface : context.theme.colorScheme.onPrimary,
                                                                                 cursorHeight: context.theme.extension<BubbleText>()!.bubbleText.fontSize! * 1.25 * (message.isBigEmoji ? 3 : 1),
                                                                                 decoration: InputDecoration(
                                                                                   contentPadding: EdgeInsets.all(iOS ? 10 : 12.5),
@@ -569,21 +603,21 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                                                   hintText: "Edited Message",
                                                                                   enabledBorder: OutlineInputBorder(
                                                                                     borderSide: BorderSide(
-                                                                                        color: context.theme.colorScheme.onPrimary,
+                                                                                        color: isLight ? context.theme.colorScheme.onSurface : context.theme.colorScheme.onPrimary,
                                                                                         width: 1.5
                                                                                     ),
                                                                                     borderRadius: BorderRadius.circular(20),
                                                                                   ),
                                                                                   border: OutlineInputBorder(
                                                                                     borderSide: BorderSide(
-                                                                                      color: context.theme.colorScheme.onPrimary,
+                                                                                      color: isLight ? context.theme.colorScheme.onSurface : context.theme.colorScheme.onPrimary,
                                                                                       width: 1.5
                                                                                     ),
                                                                                     borderRadius: BorderRadius.circular(20),
                                                                                   ),
                                                                                   focusedBorder: OutlineInputBorder(
                                                                                     borderSide: BorderSide(
-                                                                                        color: context.theme.colorScheme.onPrimary,
+                                                                                        color: isLight ? context.theme.colorScheme.onSurface : context.theme.colorScheme.onPrimary,
                                                                                         width: 1.5
                                                                                     ),
                                                                                     borderRadius: BorderRadius.circular(20),
@@ -597,7 +631,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                                                     visualDensity: VisualDensity.compact,
                                                                                     icon: Icon(
                                                                                       CupertinoIcons.xmark_circle_fill,
-                                                                                      color: context.theme.colorScheme.onPrimary,
+                                                                                      color: isLight ? context.theme.colorScheme.onSurface : context.theme.colorScheme.onPrimary,
                                                                                       size: 22,
                                                                                     ),
                                                                                     onPressed: () {
@@ -664,7 +698,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                               ),
                                                             );
 
-                                                            return message.dateScheduled != null ? DottedBorder(
+                                                            return !isLight && message.dateScheduled != null ? DottedBorder(
                                                               customPath: (size) => TailClipper(
                                                                 isFromMe: message.isFromMe!,
                                                                 showTail: message.showTail(newerMessage) && e.part == controller.parts.length - 1,
@@ -690,7 +724,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                           controller: widget.cvController,
                                                         ),
                                                       // show reactions on top
-                                                      if (message.isFromMe!)
+                                                      if (!isLight && message.isFromMe!)
                                                         Positioned(
                                                           top: -14,
                                                           left: -20,
@@ -699,7 +733,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                             message: message,
                                                           ),
                                                         ),
-                                                      if (!message.isFromMe!)
+                                                      if (!isLight && !message.isFromMe!)
                                                         Positioned(
                                                           top: -14,
                                                           right: -20,
@@ -711,7 +745,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                     ],
                                                   ),
                                                 ],
-                                              ),
+                                              )),
                                             // swipe to reply
                                             if (canSwipeToReply && !message.isGroupEvent && !e.isUnsent)
                                               Obx(() => SlideToReply(width: replyOffsets[index].value.abs(), isFromMe: message.isFromMe!)),
@@ -726,7 +760,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                           ),
                           // message properties (replies, edits, effect)
                           Padding(
-                            padding: showAvatar || ss.settings.alwaysShowAvatars.value
+                            padding: showAvatar || (ss.settings.skin.value != Skins.Light && ss.settings.alwaysShowAvatars.value)
                                 ? EdgeInsets.only(left: 35.0 * ss.settings.avatarScale.value) : EdgeInsets.zero,
                             child: MessageProperties(
                               globalKey: keys.length > index ? keys[index] : null,
