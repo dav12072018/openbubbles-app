@@ -243,7 +243,9 @@ void main() {
             .controller!
             .text,
         isEmpty);
-    await tester.tap(find.byTooltip('Menu'));
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('MENU'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reset sample conversations'));
     await tester.pumpAndSettle();

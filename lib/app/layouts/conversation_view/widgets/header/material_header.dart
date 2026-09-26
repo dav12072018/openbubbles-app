@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
 import 'package:bluebubbles/app/components/light/light_header.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/header/header_widgets.dart' show goToSettings;
 import 'package:bluebubbles/app/layouts/conversation_details/conversation_details.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/header/header_widgets.dart';
 import 'package:bluebubbles/app/components/avatars/contact_avatar_group_widget.dart';
@@ -121,11 +120,12 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
             },
           ),
         if (ss.settings.skin.value != Skins.Light) FaceTimeBtn(controller: controller),
-        Padding(
-          padding: EdgeInsets.only(top: ss.settings.skin.value != Skins.Light && kIsDesktop ? 20 : 0),
+        if (ss.settings.skin.value == Skins.Light) const SizedBox(width: 48),
+        if (ss.settings.skin.value != Skins.Light) Padding(
+          padding: EdgeInsets.only(top: kIsDesktop ? 20 : 0),
           child: PopupMenuButton<int>(
             color: context.theme.colorScheme.properSurface,
-            shape: ss.settings.skin.value == Skins.Light ? const RoundedRectangleBorder() : ss.settings.skin.value != Skins.Material ? const RoundedRectangleBorder(
+            shape: ss.settings.skin.value != Skins.Material ? const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
                 Radius.circular(20.0),
               ),
@@ -185,23 +185,12 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
                     );
                   },
                 );
-              } else if (value == 4) {
-                final address = controller.chat.participants.first.address;
-                launchUrl(Uri(scheme: address.isEmail ? "mailto" : "tel", path: address));
               } else if (value == 3) {
                 showBookmarksThread(controller, context);
-              } else if (value == 5) {
-                goToSettings(context);
               }
             },
             itemBuilder: (context) {
               return <PopupMenuItem<int>>[
-                if (ss.settings.skin.value == Skins.Light && Platform.isAndroid && !controller.chat.isGroup &&
-                    (controller.chat.participants.first.address.isPhoneNumber || controller.chat.participants.first.address.isEmail))
-                  PopupMenuItem(
-                    value: 4,
-                    child: Text(controller.chat.participants.first.address.isEmail ? 'Email' : 'Call'),
-                  ),
                 PopupMenuItem(
                   value: 0,
                   child: Text(
@@ -232,8 +221,6 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
                     style: context.textTheme.bodyLarge!.apply(color: context.theme.colorScheme.properOnSurface),
                   ),
                 ),
-                if (ss.settings.skin.value == Skins.Light)
-                  const PopupMenuItem(value: 5, child: Text('Settings')),
               ];
             },
             icon: Icon(

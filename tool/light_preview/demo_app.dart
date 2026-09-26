@@ -729,14 +729,7 @@ class _DemoHomeState extends State<_DemoHome> {
                     : null,
                 title: Text(thread?.name ?? 'Search',
                     maxLines: 1, overflow: TextOverflow.ellipsis),
-                actions: thread != null
-                    ? [
-                        IconButton(
-                            tooltip: 'Menu',
-                            onPressed: menu,
-                            icon: const Icon(Icons.more_vert))
-                      ]
-                    : null,
+                actions: thread != null ? const [SizedBox(width: 48)] : null,
               ),
         body: SafeArea(
             bottom: false,

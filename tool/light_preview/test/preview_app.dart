@@ -172,12 +172,7 @@ class _FixtureConversation extends StatelessWidget {
           onPressed: () {},
           icon: const LightBackChevron(),
         ),
-        actions: [
-          IconButton(
-              tooltip: 'Preview more',
-              onPressed: () {},
-              icon: const Icon(Icons.more_vert))
-        ],
+        actions: const [SizedBox(width: 48)],
       ),
       body: Column(
         children: [
