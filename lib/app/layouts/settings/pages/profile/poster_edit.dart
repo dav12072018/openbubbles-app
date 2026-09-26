@@ -17,6 +17,7 @@ import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/pinned_co
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/conversation_list_fab.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/widgets/header/cupertino_header.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/wrappers/scrollbar_wrapper.dart';
 import 'package:bluebubbles/services/services.dart';
 import 'package:crop_your_image/crop_your_image.dart';
@@ -431,7 +432,7 @@ class PosterEditState
 
     showDialog(
       context: Get.context!,
-      builder: (BuildContext context) {
+      builder: originalSettingsPageBuilder((BuildContext context) {
         return AlertDialog(
           backgroundColor: context.theme.colorScheme.properSurface,
           title: Text(
@@ -448,7 +449,7 @@ class PosterEditState
             ),
           ),
         );
-      }
+      })
     );
     try {
     fp.PlatformFile platformFile = res.files.first;
@@ -756,7 +757,7 @@ class PosterEditState
                     onPressed: () async {
                       showDialog(
                         context: Get.context!,
-                        builder: (BuildContext context) {
+                        builder: originalSettingsPageBuilder((BuildContext context) {
                           return AlertDialog(
                             title: Text(
                               "Change to Monogram?",
@@ -831,7 +832,7 @@ class PosterEditState
                               ),
                             ],
                           );
-                        });
+                        }));
                     },
                     child: const Icon(CupertinoIcons.textformat, color: Colors.white, size: 32,),
                   ),
@@ -866,7 +867,7 @@ class PosterEditState
                   onPressed: () async {
                     showDialog(
                       context: Get.context!,
-                      builder: (BuildContext context) {
+                      builder: originalSettingsPageBuilder((BuildContext context) {
                         return AlertDialog(
                           backgroundColor: context.theme.colorScheme.properSurface,
                           title: Text(
@@ -883,7 +884,7 @@ class PosterEditState
                             ),
                           ),
                         );
-                      }
+                      })
                     );
                     try {
                     if (poster.type is api.PosterType_Photo) {
@@ -1009,7 +1010,7 @@ class PosterEditState
                       if ((widget.handle == null || widget.handle!.contact != null) && transcriptPoster == null) {
                         await showDialog(
                         context: Get.context!,
-                        builder: (BuildContext context) {
+                        builder: originalSettingsPageBuilder((BuildContext context) {
                           return AlertDialog(
                             title: Text(
                               "Change profile photo?",
@@ -1052,7 +1053,7 @@ class PosterEditState
                               ),
                             ],
                           );
-                        });
+                        }));
                       }
                     }
 

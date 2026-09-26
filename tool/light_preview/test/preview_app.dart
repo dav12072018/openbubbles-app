@@ -109,7 +109,7 @@ class _FixtureInbox extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final label in ['SEARCH', 'NEW', 'MENU']) ...[
+                for (final label in ['SEARCH', 'MENU', 'NEW']) ...[
                   if (label != 'SEARCH')
                     VerticalDivider(
                         width: 1,
@@ -225,7 +225,8 @@ class _FixtureConversation extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text('Message',
-                      style: Theme.of(context).textTheme.bodyMedium),
+                      style: lightMessageTextStyle.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface)),
                 ),
               ),
               LightVoiceNoteControls(

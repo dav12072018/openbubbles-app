@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:animated_size_and_fade/animated_size_and_fade.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:bluebubbles/app/layouts/conversation_details/dialogs/timeframe_picker.dart';
 import 'package:bluebubbles/app/layouts/settings/dialogs/custom_headers_dialog.dart';
@@ -482,9 +483,9 @@ class _ServerManagementPanelState extends CustomState<ServerManagementPanel, voi
                               fcmData = jsonDecode(
                                 utf8.decode(await Navigator.of(context).push(
                                   CupertinoPageRoute(
-                                    builder: (BuildContext context) {
+                                    builder: originalSettingsPageBuilder((BuildContext context) {
                                       return QRCodeScanner();
-                                    },
+                                    }),
                                   ),
                                 )),
                               );

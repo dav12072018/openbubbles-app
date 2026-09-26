@@ -200,6 +200,9 @@ void main() {
       for (final text in ['Received', 'Sent', 'Selected']) {
         final style =
             DefaultTextStyle.of(tester.element(find.text(text))).style;
+        expect(style.fontFamily, 'Inter');
+        expect(style.fontSize, 14);
+        expect(style.height, 1.45);
         final fill = background(text);
         final canvas =
             Theme.of(tester.element(find.text(text))).scaffoldBackgroundColor;
@@ -215,6 +218,13 @@ void main() {
     testWidgets(
         '${brightness.name} sender captions sit above smaller than message text',
         (tester) async {
+      tester.view.physicalSize = const Size(360, 413);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final semantics = tester.ensureSemantics();
       await tester.pumpWidget(MaterialApp(
         theme: createLightPhoneTheme(brightness),
         home: const Scaffold(
@@ -231,7 +241,23 @@ void main() {
       final body =
           DefaultTextStyle.of(tester.element(find.text('I can bring coffee.')))
               .style;
-      expect(caption.fontSize, lessThan(body.fontSize!));
+      expect(caption.fontSize, 11);
+      expect(tester.widget<Text>(find.text('You')).style!.fontSize, 11);
+      expect(body.fontSize, 14);
+      expect(
+          tester
+              .renderObject<RenderParagraph>(find.text('I can bring coffee.'))
+              .textScaler
+              .scale(14),
+          closeTo(22.4, 0.01));
+      expect(
+          tester
+              .renderObject<RenderParagraph>(find.text('Jamie'))
+              .textScaler
+              .scale(11),
+          closeTo(17.6, 0.01));
+      expect(find.bySemanticsLabel('I can bring coffee.'), findsOneWidget);
+      expect(find.bySemanticsLabel('See you soon.'), findsOneWidget);
       expect(tester.getBottomLeft(find.text('Jamie')).dy,
           lessThan(tester.getTopLeft(find.text('I can bring coffee.')).dy));
       expect(tester.getBottomLeft(find.text('You')).dy,
@@ -250,6 +276,8 @@ void main() {
               Theme.of(tester.element(find.text('Jamie')))
                   .scaffoldBackgroundColor),
           greaterThanOrEqualTo(4.5));
+      expect(tester.takeException(), isNull);
+      semantics.dispose();
     });
   }
 

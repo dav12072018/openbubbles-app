@@ -131,8 +131,8 @@ class _FirebasePanelState extends OptimizedState<FirebasePanel> {
                         backgroundColor: tileColor,
                         title: "Load Configurations from Server",
                         subtitle: 'Download Firebase configurations directly from your server.',
-                        trailing: Obx(() => ss.settings.skin.value != Skins.Material ? Icon(
-                            ss.settings.skin.value != Skins.Material
+                        trailing: Obx(() => settingsSkin(context) != Skins.Material ? Icon(
+                            settingsSkin(context) != Skins.Material
                                 ? CupertinoIcons.refresh
                                 : Icons.refresh,
                             color: context.theme.colorScheme.outline.withOpacity(0.5),
@@ -269,8 +269,8 @@ class _FirebasePanelState extends OptimizedState<FirebasePanel> {
                       return SettingsTile(
                         backgroundColor: tileColor,
                         title: "Re-register Device with Server",
-                        trailing: Obx(() => ss.settings.skin.value != Skins.Material ? Icon(
-                            ss.settings.skin.value != Skins.Material
+                        trailing: Obx(() => settingsSkin(context) != Skins.Material ? Icon(
+                            settingsSkin(context) != Skins.Material
                                 ? CupertinoIcons.refresh
                                 : Icons.refresh_outlined,
                             color: context.theme.colorScheme.outline.withOpacity(0.5),

@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/layouts/settings/widgets/content/next_button.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/utils/window_effects.dart';
@@ -93,7 +94,7 @@ class _ThemingPanelState extends CustomState<ThemingPanel, void, ThemingPanelCon
                         onTap: () async {
                           Navigator.of(context).push(
                             CupertinoPageRoute(
-                              builder: (context) => AdvancedThemingPanel(),
+                              builder: originalSettingsPageBuilder((context) => AdvancedThemingPanel()),
                             ),
                           );
                         },

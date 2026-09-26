@@ -281,7 +281,7 @@ ThemeData _lightPhoneTheme(Brightness brightness) {
       smsBubbleColor: colors.primary, onSmsBubbleColor: colors.onPrimary,
       receivedBubbleColor: colors.surface, onReceivedBubbleColor: colors.onSurface,
     ),
-    BubbleText(bubbleText: theme.textTheme.bodyLarge!),
+    BubbleText(bubbleText: lightMessageTextStyle.copyWith(color: colors.onSurface)),
   ]);
 }
 

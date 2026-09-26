@@ -198,15 +198,6 @@ class _LightConversationListState extends CustomState<LightConversationList,
                           VerticalDivider(
                               width: 1, thickness: 0.5, color: foreground),
                           Expanded(
-                            child: _action(
-                              'NEW',
-                              () => controller.openNewChatCreator(context),
-                              focusNode: controller.newMessageFocusNode,
-                            ),
-                          ),
-                          VerticalDivider(
-                              width: 1, thickness: 0.5, color: foreground),
-                          Expanded(
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
@@ -220,6 +211,15 @@ class _LightConversationListState extends CustomState<LightConversationList,
                                     ),
                                   ),
                               ],
+                            ),
+                          ),
+                          VerticalDivider(
+                              width: 1, thickness: 0.5, color: foreground),
+                          Expanded(
+                            child: _action(
+                              'NEW',
+                              () => controller.openNewChatCreator(context),
+                              focusNode: controller.newMessageFocusNode,
                             ),
                           ),
                         ],

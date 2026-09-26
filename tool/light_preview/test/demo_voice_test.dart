@@ -171,7 +171,16 @@ void main() {
     expect(find.byType(LightMessageSender), findsNWidgets(3));
     for (final name in ['Jamie', 'Morgan', 'You']) {
       final caption = tester.widget<Text>(find.text(name));
-      expect(caption.style!.fontSize, 14);
+      expect(caption.style!.fontSize, 11);
+    }
+    for (final text in [
+      'I can bring coffee.',
+      'I’ll bring the cups.',
+      'See you both at nine.',
+    ]) {
+      expect(
+          DefaultTextStyle.of(tester.element(find.text(text))).style.fontSize,
+          14);
     }
     expect(tester.getRect(find.text('I can bring coffee.')).left,
         closeTo(18, 0.01));

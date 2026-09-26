@@ -16,6 +16,7 @@ import 'recipient_picker.dart';
 import 'images/image_factory.dart';
 import 'images/image_preview.dart';
 import 'demo_keyboard.dart';
+import 'demo_settings.dart';
 
 /// Standalone, in-memory UI demo. It has no messaging or account services.
 class LightDemoApp extends StatefulWidget {
@@ -585,6 +586,8 @@ class _DemoHomeState extends State<_DemoHome> {
                 child: TextField(
               key: const ValueKey('demo-draft'),
               controller: draft,
+              style: lightMessageTextStyle.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface),
               focusNode: draftFocus,
               keyboardType: TextInputType.multiline,
               textInputAction: TextInputAction.newline,
@@ -592,7 +595,10 @@ class _DemoHomeState extends State<_DemoHome> {
               maxLines: 4,
               onChanged: (_) => setState(() {}),
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(hintText: 'Message'),
+              decoration: InputDecoration(
+                  hintText: 'Message',
+                  hintStyle: lightMessageTextStyle.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant)),
             )),
             SizedBox(
                 width: 62,
@@ -635,6 +641,14 @@ class _DemoHomeState extends State<_DemoHome> {
             child: Text(
                 'Local demo\nMessages stay here. Nothing is sent to anyone. Changes reset when you reload.',
                 textAlign: TextAlign.center),
+          ),
+          ListTile(
+            title: const Text('Settings'),
+            onTap: () {
+              Navigator.pop(sheetContext);
+              Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const DemoSettingsPage()));
+            },
           ),
           ListTile(
             title: Text(widget.brightness == Brightness.dark
@@ -882,12 +896,12 @@ class _DemoHomeState extends State<_DemoHome> {
                             width: 1,
                             thickness: 0.5,
                             color: theme.colorScheme.onSurface),
-                        action('NEW', createThread),
+                        action('MENU', menu),
                         VerticalDivider(
                             width: 1,
                             thickness: 0.5,
                             color: theme.colorScheme.onSurface),
-                        action('MENU', menu),
+                        action('NEW', createThread),
                       ]),
                 )),
       ),

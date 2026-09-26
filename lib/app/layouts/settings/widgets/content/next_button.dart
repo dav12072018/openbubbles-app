@@ -1,5 +1,5 @@
 import 'package:bluebubbles/helpers/types/constants.dart';
-import 'package:bluebubbles/services/services.dart';
+import 'package:bluebubbles/helpers/ui/theme_helpers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,8 +9,8 @@ class NextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => ss.settings.skin.value != Skins.Material ? Icon(
-        ss.settings.skin.value != Skins.Material
+    return Obx(() => settingsSkin(context) != Skins.Material ? Icon(
+        settingsSkin(context) != Skins.Material
             ? CupertinoIcons.chevron_right
             : Icons.arrow_forward,
         color: context.theme.colorScheme.outline.withOpacity(0.5),

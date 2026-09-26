@@ -47,7 +47,7 @@ class SettingsScaffold extends StatelessWidget {
         statusBarIconBrightness: context.theme.colorScheme.brightness.opposite,
       ),
       child: Scaffold(
-        backgroundColor: ss.settings.skin.value == Skins.Material ? tileColor : headerColor,
+        backgroundColor: settingsSkin(context) == Skins.Material ? tileColor : headerColor,
         appBar: ss.settings.skin.value == Skins.Samsung
             ? null
             : PreferredSize(
@@ -62,7 +62,7 @@ class SettingsScaffold extends StatelessWidget {
             surfaceTintColor: context.theme.colorScheme.primary,
             leading: buildBackButton(context),
             backgroundColor: headerColor,
-            centerTitle: ss.settings.skin.value == Skins.iOS || ss.settings.skin.value == Skins.Light,
+            centerTitle: settingsSkin(context) == Skins.iOS || settingsSkin(context) == Skins.Light,
             title: Text(
               title,
               style: context.theme.textTheme.titleLarge,

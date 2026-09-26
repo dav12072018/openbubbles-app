@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// Rounded LP3 Detail text for compact, readable conversation content.
+const lightMessageTextStyle = TextStyle(
+  fontFamily: 'Inter',
+  fontSize: 14,
+  height: 1.45,
+  fontWeight: FontWeight.w400,
+);
+
 /// Flutter interpretation of the Light SDK's monochrome palette and typography.
 /// Akkurat is licensed to Light hardware; use the app's existing Inter instead.
 ThemeData createLightPhoneTheme(Brightness brightness) {

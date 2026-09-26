@@ -23,9 +23,19 @@ void main() {
     expect(find.text('Messages'), findsNothing);
     final label = tester.getRect(find.text('LOCAL DEMO · NO REAL SENDS'));
     expect(label.top, greaterThanOrEqualTo(24));
-    for (final action in ['SEARCH', 'NEW', 'MENU']) {
+    final actions = ['SEARCH', 'MENU', 'NEW'];
+    for (final action in actions) {
       expect(find.text(action).hitTestable(), findsOneWidget);
     }
+    for (var index = 1; index < actions.length; index++) {
+      expect(tester.getRect(find.text(actions[index - 1])).right,
+          lessThan(tester.getRect(find.text(actions[index])).left));
+    }
+    await tester.tap(find.text('MENU'));
+    await tester.pumpAndSettle();
+    expect(find.text('Settings').hitTestable(), findsOneWidget);
+    await tester.tap(find.text('Back to demo'));
+    await tester.pumpAndSettle();
     final navigationTop =
         tester.getRect(find.widgetWithText(TextButton, 'SEARCH')).top;
     final rows = find.byType(LightConversationRow);
@@ -104,6 +114,36 @@ void main() {
             (widget) => widget is Text && widget.data == 'Taylor'),
         findsOneWidget);
     expect(find.text('Alex Morgan'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+      'Settings opens from the conversation menu and preserves its draft',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 413);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const LightDemoApp());
+    await tester.tap(find.text('Alex Morgan'));
+    await tester.pumpAndSettle();
+    final draft = find.byKey(const ValueKey('demo-draft'));
+    await tester.enterText(draft, 'Keep this draft while I check settings.');
+    await tester.pump();
+    expect(tester.widget<TextField>(draft).style!.fontSize, 14);
+    await tester.tap(find.byTooltip('Menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
+    expect(find.text('Local preview · Read-only settings'), findsOneWidget);
+    expect(find.byTooltip('Back').hitTestable(), findsOneWidget);
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Alex Morgan'), findsOneWidget);
+    expect(tester.widget<TextField>(draft).controller!.text,
+        'Keep this draft while I check settings.');
+    expect(find.text('SEND').hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

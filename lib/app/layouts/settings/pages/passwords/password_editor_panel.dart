@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:bluebubbles/app/layouts/settings/pages/passwords/password_models.dart';
+import 'package:bluebubbles/app/wrappers/original_settings_theme.dart';
 import 'package:bluebubbles/app/layouts/setup/pages/sync/qr_code_scanner.dart';
 import 'package:bluebubbles/app/layouts/settings/widgets/settings_widgets.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
@@ -977,9 +978,9 @@ class _PasswordEditorPanelState extends OptimizedState<PasswordEditorPanel> {
     try {
       Uint8List? response = await Navigator.of(context).push(
         CupertinoPageRoute(
-          builder: (BuildContext context) {
+          builder: originalSettingsPageBuilder((BuildContext context) {
             return QRCodeScanner();
-          },
+          }),
         ),
       );
       if (response == null || response.isEmpty) {

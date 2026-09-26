@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
 import 'package:bluebubbles/app/components/light/light_header.dart';
+import 'package:bluebubbles/app/layouts/conversation_list/widgets/header/header_widgets.dart' show goToSettings;
 import 'package:bluebubbles/app/layouts/conversation_details/conversation_details.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/widgets/header/header_widgets.dart';
 import 'package:bluebubbles/app/components/avatars/contact_avatar_group_widget.dart';
@@ -189,6 +190,8 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
                 launchUrl(Uri(scheme: address.isEmail ? "mailto" : "tel", path: address));
               } else if (value == 3) {
                 showBookmarksThread(controller, context);
+              } else if (value == 5) {
+                goToSettings(context);
               }
             },
             itemBuilder: (context) {
@@ -229,6 +232,8 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
                     style: context.textTheme.bodyLarge!.apply(color: context.theme.colorScheme.properOnSurface),
                   ),
                 ),
+                if (ss.settings.skin.value == Skins.Light)
+                  const PopupMenuItem(value: 5, child: Text('Settings')),
               ];
             },
             icon: Icon(

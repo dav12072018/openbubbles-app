@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'light_theme.dart';
 
 /// Plain message text shared by the live transcript and preview.
 /// Text follows message direction; only selection adds a background.
@@ -31,7 +32,7 @@ class LightMessageSurface extends StatelessWidget {
         color: background,
       ),
       child: DefaultTextStyle(
-        style: theme.textTheme.bodyLarge!.copyWith(color: foreground),
+        style: lightMessageTextStyle.copyWith(color: foreground),
         textAlign: isFromMe ? TextAlign.right : TextAlign.left,
         child: child,
       ),

@@ -20,6 +20,7 @@ class LightMessageSender extends StatelessWidget {
         name,
         textAlign: isFromMe ? TextAlign.right : TextAlign.left,
         style: theme.textTheme.labelMedium!.copyWith(
+          fontSize: 11,
           color: theme.colorScheme.onSurfaceVariant,
           fontWeight: FontWeight.w400,
         ),
