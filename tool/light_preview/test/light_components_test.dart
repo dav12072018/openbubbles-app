@@ -15,9 +15,9 @@ import 'preview_app.dart';
 
 Future<void> loadPreviewFonts() async {
   final font = FontLoader('Inter')
-    ..addFont(rootBundle.load(
-      '../../assets/fonts/Inter-VariableFont_opsz,wght.ttf',
-    ));
+    ..addFont(File('../../assets/fonts/Inter-VariableFont_opsz,wght.ttf')
+        .readAsBytes()
+        .then((bytes) => ByteData.sublistView(bytes)));
   await font.load();
   final icons = FontLoader('MaterialIcons')
     ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
@@ -222,37 +222,29 @@ void main() {
             .copyWith(textScaler: const TextScaler.linear(1.6)),
         child: child!,
       ),
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Alex')),
-        body: Column(children: [
-          const Expanded(child: SizedBox.expand()),
-          Flexible(
-              fit: FlexFit.loose,
-              child: LightComposerViewport(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const SizedBox(
-                    height: 100,
-                    child: Text(
-                        'Replying to a previous message with several lines.')),
-                const SizedBox(
-                    height: 100,
-                    child: Center(child: Text('Attachment preview'))),
-                const Padding(
-                    padding: EdgeInsets.all(14),
-                    child: Text(
-                        'A multiline draft message which stays above the keyboard.')),
-                SizedBox(
-                    height: 48,
-                    child: TextButton(
-                        onPressed: () => sent++, child: const Text('SEND'))),
-              ]))),
+      home: _ComposerIntegrationFixture(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(
+              height: 100,
+              child:
+                  Text('Replying to a previous message with several lines.')),
+          const SizedBox(
+              height: 100, child: Center(child: Text('Attachment preview'))),
+          const Padding(
+              padding: EdgeInsets.all(14),
+              child: Text(
+                  'A multiline draft message which stays above the keyboard.')),
+          SizedBox(
+              height: 48,
+              child: TextButton(
+                  onPressed: () => sent++, child: const Text('SEND'))),
         ]),
       ),
     ));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(tester.getSize(find.byType(LightComposerViewport)).height,
-        lessThanOrEqualTo((413 - 200 - kToolbarHeight) / 2));
+        lessThanOrEqualTo((413 - 200 - kToolbarHeight) * 0.65));
     expect(find.text('SEND').hitTestable(), findsOneWidget);
     await tester.tap(find.text('SEND'));
     expect(sent, 1);
@@ -260,6 +252,31 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Attachment preview').hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+      'tall screen short composer leaves all remaining space to transcript',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(MaterialApp(
+      theme: createLightPhoneTheme(Brightness.dark),
+      home: const _ComposerIntegrationFixture(
+          child: SizedBox(height: 68, child: Center(child: Text('Message')))),
+    ));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final body =
+        tester.getRect(find.byKey(const ValueKey('composer-layout-body')));
+    final transcript = tester
+        .getRect(find.byKey(const ValueKey('composer-layout-transcript')));
+    final composer = tester.getRect(find.byType(LightComposerViewport));
+    expect(composer.height, 68);
+    expect(transcript.height, body.height - composer.height);
+    expect(transcript.bottom, composer.top);
+    expect(composer.bottom, body.bottom);
   });
 
   if (const bool.fromEnvironment('RENDER_PREVIEWS')) {
@@ -298,4 +315,40 @@ void main() {
       }
     }
   }
+}
+
+/// Mirrors ConversationView's non-flex composer constraint and Stack/Align
+/// sizing. The body extends behind the toolbar, so the cap reserves its height.
+class _ComposerIntegrationFixture extends StatelessWidget {
+  const _ComposerIntegrationFixture({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(title: const Text('Alex')),
+        body: LayoutBuilder(
+            builder: (context, constraints) => Column(
+                  key: const ValueKey('composer-layout-body'),
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    const Expanded(
+                        child: SizedBox.expand(
+                            key: ValueKey('composer-layout-transcript'))),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                          maxHeight: (constraints.maxHeight - kToolbarHeight)
+                                  .clamp(0.0, double.infinity) *
+                              0.65),
+                      child: Stack(children: [
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          heightFactor: 1,
+                          child: LightComposerViewport(child: child),
+                        )
+                      ]),
+                    ),
+                  ],
+                )),
+      );
 }

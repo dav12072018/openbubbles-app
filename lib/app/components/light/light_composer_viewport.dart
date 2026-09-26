@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 /// Keeps the composer reachable above the keyboard on the short LP3 display.
 /// Replies, attachment previews and a multiline draft can scroll inside this
 /// viewport instead of pushing the transcript and send action off screen.
-/// Use as a Flexible child of the transcript Column so Scaffold-consumed
-/// keyboard insets are also reflected in the incoming layout constraints.
+/// The parent bounds this non-flex child using LayoutBuilder's actual body
+/// constraints, which reflect keyboard insets already consumed by Scaffold.
+/// Short composers retain their natural height so the transcript gets the rest.
 class LightComposerViewport extends StatelessWidget {
   const LightComposerViewport({super.key, required this.child});
   final Widget child;

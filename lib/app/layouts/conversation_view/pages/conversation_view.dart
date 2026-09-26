@@ -62,11 +62,17 @@ class ConversationViewState extends OptimizedState<ConversationView> {
     super.dispose();
   }
 
-  // Scaffold consumes keyboard insets before laying out its body. Bound the
-  // Light composer by the real Column constraints as well as its own viewport.
-  Widget _constrainComposer(Widget child) => ss.settings.skin.value == Skins.Light
-      ? Flexible(fit: FlexFit.loose, child: child)
-      : child;
+  // Use the actual body height after Scaffold consumes keyboard insets. Keep
+  // the composer non-flex so the transcript gets all of its unused space.
+  Widget _constrainComposer(Widget child, BoxConstraints constraints) {
+    if (ss.settings.skin.value != Skins.Light) return child;
+    // The body extends behind the app bar, which must remain visible too.
+    final availableHeight = (constraints.maxHeight - kToolbarHeight).clamp(0.0, double.infinity);
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: availableHeight * 0.65),
+      child: child,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +161,7 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                         if (ss.settings.skin.value != Skins.Light && controller.backgroundPoster.value != null)
                         ImagePoster(poster: controller.backgroundPoster.value!.poster, images: controller.images),
                         if (ss.settings.skin.value != Skins.Light) const Positioned.fill(child: ScreenEffectsWidget()),
-                        Column(
+                        LayoutBuilder(builder: (context, constraints) => Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Expanded(
@@ -239,9 +245,9 @@ class ConversationViewState extends OptimizedState<ConversationView> {
                                   ),
                                 )
                               ]
-                            )),
+                            ), constraints),
                           ],
-                        ),
+                        )),
                       ],
                     ),
                   ),
