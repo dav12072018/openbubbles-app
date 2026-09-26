@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../lib/app/components/light/light_conversation_row.dart';
+import '../../../lib/app/components/light/light_header.dart';
 import '../../../lib/app/components/light/light_message_surface.dart';
 import '../../../lib/app/components/light/light_voice_note_controls.dart';
 import '../../../lib/app/components/light/light_theme.dart';
@@ -161,12 +162,15 @@ class _FixtureConversation extends StatelessWidget {
         );
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 56,
+        toolbarHeight: lightToolbarHeight,
+        titleTextStyle: lightHeaderTitleStyle.copyWith(
+            color: Theme.of(context).colorScheme.onSurface),
         title: const Text('Alex Morgan'),
         leading: IconButton(
           tooltip: 'Preview back',
+          iconSize: 80 / 3,
           onPressed: () {},
-          icon: const Icon(Icons.arrow_back),
+          icon: const LightBackChevron(),
         ),
         actions: [
           IconButton(

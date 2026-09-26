@@ -20,8 +20,11 @@ class BackButton extends StatelessWidget {
   final bool Function()? onPressed;
   final Color? color;
   final FocusNode? focusNode;
+  final Widget? icon;
+  final String? tooltip;
+  final double? iconSize;
 
-  const BackButton({this.color, this.onPressed, this.focusNode});
+  const BackButton({this.color, this.onPressed, this.focusNode, this.icon, this.tooltip, this.iconSize});
 
   @override
   Widget build(BuildContext context) {
@@ -52,11 +55,12 @@ class BackButton extends StatelessWidget {
             },
             child: IconButton(
               focusNode: focusNode,
-              icon: Obx(() => Icon(
+              tooltip: tooltip,
+              icon: icon ?? Obx(() => Icon(
                 ss.settings.skin.value != Skins.Material ? CupertinoIcons.back : Icons.arrow_back,
                 color: color ?? context.theme.colorScheme.primary,
               )),
-              iconSize: ss.settings.skin.value != Skins.Material ? 30 : 24,
+              iconSize: iconSize ?? (ss.settings.skin.value != Skins.Material ? 30 : 24),
               onPressed: () {
                 if (kIsDesktop) return;
                 goBack();

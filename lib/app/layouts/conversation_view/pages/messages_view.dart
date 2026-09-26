@@ -824,8 +824,13 @@ class MessagesViewState extends OptimizedState<MessagesView> {
                                     highlightColor: context.theme.colorScheme.surface.withOpacity(0.7),
                                     child: toReturn);
                               }),
-                          const SliverPadding(
-                            padding: EdgeInsets.all(70),
+                          SliverPadding(
+                            // In this reversed list the last sliver is at the
+                            // top. Scaffold includes the actual app bar and
+                            // status inset in body padding when extending behind it.
+                            padding: ss.settings.skin.value == Skins.Light
+                                ? EdgeInsets.only(top: MediaQuery.paddingOf(context).top)
+                                : const EdgeInsets.all(70),
                           ),
                         ],
                       ),

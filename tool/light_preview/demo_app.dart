@@ -10,6 +10,7 @@ import '../../lib/app/components/light/light_conversation_row.dart';
 import '../../lib/app/components/light/light_message_surface.dart';
 import '../../lib/app/components/light/light_message_sender.dart';
 import '../../lib/app/components/light/light_theme.dart';
+import '../../lib/app/components/light/light_header.dart';
 import 'voice/voice_factory.dart';
 import 'recipient_picker.dart';
 import 'images/image_factory.dart';
@@ -700,12 +701,17 @@ class _DemoHomeState extends State<_DemoHome> {
         appBar: thread == null && !searching
             ? null
             : AppBar(
-                toolbarHeight: thread == null ? 48 : 56,
+                toolbarHeight: thread == null ? 48 : lightToolbarHeight,
+                titleTextStyle: thread == null
+                    ? null
+                    : lightHeaderTitleStyle.copyWith(
+                        color: theme.colorScheme.onSurface),
                 leading: thread != null || searching
                     ? IconButton(
                         tooltip: 'Back',
+                        iconSize: 80 / 3,
                         onPressed: back,
-                        icon: const Icon(Icons.arrow_back))
+                        icon: const LightBackChevron())
                     : null,
                 title: Text(thread?.name ?? 'Search',
                     maxLines: 1, overflow: TextOverflow.ellipsis),

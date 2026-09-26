@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../lib/app/components/light/light_conversation_row.dart';
+import '../../../lib/app/components/light/light_header.dart';
 import '../demo_app.dart';
 import '../recipient_picker.dart';
 
@@ -46,8 +47,26 @@ void main() {
     await tester.tap(find.text('Alex Morgan'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Alex Morgan'), findsOneWidget);
-    expect(tester.widget<AppBar>(find.byType(AppBar)).toolbarHeight, 56);
+    expect(tester.widget<AppBar>(find.byType(AppBar)).toolbarHeight, 40);
+    final titleStyle =
+        DefaultTextStyle.of(tester.element(find.text('Alex Morgan'))).style;
+    expect(titleStyle.fontSize, 17);
+    expect(titleStyle.fontFamily, 'Inter');
+    expect(find.byType(LightBackChevron).hitTestable(), findsOneWidget);
     expect(find.byTooltip('Back').hitTestable(), findsOneWidget);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpAndSettle();
+    final title = tester.getRect(find.text('Alex Morgan'));
+    final header = tester.getRect(find.byType(AppBar));
+    expect(title.height, lessThanOrEqualTo(40));
+    expect(title.top, greaterThanOrEqualTo(header.top + 24));
+    expect(title.bottom, lessThanOrEqualTo(header.bottom));
+    expect(find.byType(LightBackChevron).hitTestable(), findsOneWidget);
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AppBar), findsNothing);
+    expect(find.text('NEW').hitTestable(), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
