@@ -6,6 +6,8 @@
 
 NEW starts with a recipient picker. Type a name, phone number, or email to filter the fictional sample contacts; select a suggestion or add a complete phone number/email with + or Enter. Keep adding recipients for a group, remove any with ×, then press NEXT to write a message. NEXT also includes a complete address still in the field. The Android app uses OpenBubbles’ existing picker and the device’s actual contacts.
 
+Open **Image preview** to inspect received and sent sample images. Tap an image for a full-screen view with pinch/pan, zoom buttons, and reset. The original 640 × 400 color-and-geometry test image makes changes in color or aspect ratio easy to spot. In any conversation, **+** opens your device's file picker; choose images, review/remove the draft thumbnails, then SEND, with or without text. Up to 10 images can be selected at once, at 20 MiB each. Browser-decodable JPEG, PNG, WebP and GIF files work; unsupported formats show an error. Your files stay in browser memory and are never uploaded; the sample conversation is cleared on reload/reset. This exercises the local demo, not authenticated Android message delivery.
+
 When the draft is empty, the microphone starts a **local browser voice recording**. Browser microphone permission is requested only when you press it. STOP opens review controls to PLAY, CANCEL, or SEND into the local sample conversation; sent voice notes can be played again. During playback, STOP ends playback; PLAY starts again from the beginning. Recordings stay in memory, are never uploaded, and disappear on reset or reload. Use localhost or HTTPS for browser microphone access. The demo uses the production plain-text message surface and small sender captions; incoming messages align left and sent messages align right.
 
 On desktop the demo uses a 360 × 413 phone viewport; on smaller screens it fills the available window. The original screenshot fixtures and component checks remain separate.
@@ -40,3 +42,5 @@ Checks cover monochrome colors and text/action contrast, both brightness modes, 
 Demo interaction checks inject a fake microphone adapter and cover record/stop/cancel/review/play/send, permission failure and late permission cancellation, and group sender alignment. Automated checks never activate a real microphone. The web implementation uses browser `getUserMedia`, `MediaRecorder`, and local blob playback without additional packages.
 
 Recipient checks cover name/email/phone autocomplete, multiple selections, removal, duplicate prevention, manual addresses, pending-address inclusion, validation, cancellation, and reaching NEXT above the keyboard at 360 × 413 with 1.6× text.
+
+Image checks use an injected file picker and real PNG bytes to cover preview/removal, image-only and mixed-text sends, received/sent alignment, fullscreen zoom, decoding errors, and compact keyboard layouts without opening personal files.

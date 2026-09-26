@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -9,11 +10,14 @@ import '../../lib/app/components/light/light_message_sender.dart';
 import '../../lib/app/components/light/light_theme.dart';
 import 'voice/voice_factory.dart';
 import 'recipient_picker.dart';
+import 'images/image_factory.dart';
+import 'images/image_preview.dart';
 
 /// Standalone, in-memory UI demo. It has no messaging or account services.
 class LightDemoApp extends StatefulWidget {
-  const LightDemoApp({super.key, this.voiceCapture});
+  const LightDemoApp({super.key, this.voiceCapture, this.imagePicker});
   final LocalVoiceCapture? voiceCapture;
+  final LocalImagePicker? imagePicker;
 
   @override
   State<LightDemoApp> createState() => _LightDemoAppState();
@@ -29,6 +33,7 @@ class _LightDemoAppState extends State<LightDemoApp> {
         theme: createLightPhoneTheme(brightness),
         home: _DemoHome(
           voiceCapture: widget.voiceCapture,
+          imagePicker: widget.imagePicker,
           brightness: brightness,
           toggleBrightness: () => setState(() => brightness =
               brightness == Brightness.dark
@@ -39,11 +44,13 @@ class _LightDemoAppState extends State<LightDemoApp> {
 }
 
 class _DemoMessage {
-  const _DemoMessage(this.text, {this.fromMe = false, this.sender, this.voice});
+  const _DemoMessage(this.text,
+      {this.fromMe = false, this.sender, this.voice, this.image});
   final String text;
   final bool fromMe;
   final String? sender;
   final LocalVoiceClip? voice;
+  final DemoImage? image;
 }
 
 class _DemoThread {
@@ -63,6 +70,21 @@ class _DemoThread {
 }
 
 List<_DemoThread> _sampleThreads() => [
+      _DemoThread('Image preview', [
+        const _DemoMessage('Image',
+            image: DemoImage.asset(
+                name: 'received-sample.png',
+                width: 640,
+                height: 400,
+                path: 'assets/images/sample-image.png')),
+        const _DemoMessage('Image',
+            fromMe: true,
+            image: DemoImage.asset(
+                name: 'sent-sample.png',
+                width: 640,
+                height: 400,
+                path: 'assets/images/sample-image.png')),
+      ]),
       _DemoThread(
           'Alex Morgan',
           [
@@ -99,10 +121,12 @@ class _DemoHome extends StatefulWidget {
   const _DemoHome(
       {required this.brightness,
       required this.toggleBrightness,
-      this.voiceCapture});
+      this.voiceCapture,
+      this.imagePicker});
   final Brightness brightness;
   final VoidCallback toggleBrightness;
   final LocalVoiceCapture? voiceCapture;
+  final LocalImagePicker? imagePicker;
 
   @override
   State<_DemoHome> createState() => _DemoHomeState();
@@ -117,6 +141,11 @@ class _DemoHomeState extends State<_DemoHome> {
   final search = TextEditingController();
   final transcript = ScrollController();
   late final LocalVoiceCapture voiceCapture;
+  late final LocalImagePicker imagePicker;
+  final imageDrafts = <DemoImage>[];
+  bool pickingImages = false;
+  String? imageError;
+  int imageSession = 0;
   bool voiceStarting = false;
   bool recording = false;
   bool voiceStopping = false;
@@ -131,12 +160,14 @@ class _DemoHomeState extends State<_DemoHome> {
   void initState() {
     super.initState();
     voiceCapture = widget.voiceCapture ?? createLocalVoiceCapture();
+    imagePicker = widget.imagePicker ?? createLocalImagePicker();
   }
 
   @override
   void dispose() {
     recordingTimer?.cancel();
     voiceCapture.dispose();
+    imagePicker.dispose();
     draft.dispose();
     search.dispose();
     transcript.dispose();
@@ -145,6 +176,7 @@ class _DemoHomeState extends State<_DemoHome> {
 
   void back() {
     discardVoice();
+    clearImages();
     FocusScope.of(context).unfocus();
     setState(() {
       selected = null;
@@ -157,6 +189,7 @@ class _DemoHomeState extends State<_DemoHome> {
 
   void openThread(_DemoThread thread) {
     discardVoice();
+    clearImages();
     FocusScope.of(context).unfocus();
     setState(() {
       selected = thread;
@@ -174,13 +207,128 @@ class _DemoHomeState extends State<_DemoHome> {
 
   void sendLocally() {
     final text = draft.text.trim();
-    if (text.isEmpty || selected == null) return;
+    if ((text.isEmpty && imageDrafts.isEmpty) ||
+        selected == null ||
+        pickingImages) return;
     setState(() {
-      selected!.messages.add(_DemoMessage(text, fromMe: true));
+      if (text.isNotEmpty)
+        selected!.messages.add(_DemoMessage(text, fromMe: true));
+      for (final image in imageDrafts) {
+        selected!.messages
+            .add(_DemoMessage('Image', fromMe: true, image: image));
+      }
+      clearImages();
       draft.clear();
     });
     scrollToLatest();
   }
+
+  void clearImages() {
+    imageSession++;
+    imageDrafts.clear();
+    imageError = null;
+  }
+
+  Future<void> pickImages() async {
+    if (selected == null || pickingImages) return;
+    final session = ++imageSession;
+    setState(() {
+      pickingImages = true;
+      imageError = null;
+    });
+    try {
+      // The browser chooser must open within this explicit button gesture.
+      final files = await imagePicker.pick();
+      final accepted = <DemoImage>[];
+      final errors = <String>[];
+      for (final file in files) {
+        if (!mounted || session != imageSession) return;
+        try {
+          final codec = await ui.instantiateImageCodec(file.bytes);
+          try {
+            final frame = await codec.getNextFrame();
+            accepted.add(DemoImage.memory(
+                name: file.name,
+                data: file.bytes,
+                width: frame.image.width,
+                height: frame.image.height));
+            frame.image.dispose();
+          } finally {
+            codec.dispose();
+          }
+        } catch (_) {
+          errors.add(
+              'Could not open ${file.name}. Try a JPEG, PNG, WebP or GIF image.');
+        }
+      }
+      if (!mounted || session != imageSession) return;
+      setState(() {
+        imageDrafts.addAll(accepted);
+        imageError = errors.isEmpty ? null : errors.join('\n');
+      });
+    } catch (error) {
+      if (mounted && session == imageSession) {
+        setState(() => imageError = error is LocalImagePickerException
+            ? error.toString()
+            : 'Could not open the image picker. Please try again.');
+      }
+    } finally {
+      // Keep one picker request in flight even if the user changes threads.
+      // Its result is discarded above, then the next conversation can pick.
+      if (mounted) setState(() => pickingImages = false);
+    }
+  }
+
+  void openImage(DemoImage image) {
+    FocusScope.of(context).unfocus();
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => DemoImageViewer(image: image)));
+  }
+
+  Widget imageDraftStrip() => SizedBox(
+        height: 104,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: [
+            for (final image in imageDrafts)
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: SizedBox(
+                  width: 104,
+                  child: Stack(children: [
+                    Positioned.fill(
+                      child: Semantics(
+                        button: true,
+                        label: 'Preview ${image.name}',
+                        child: GestureDetector(
+                          onTap: () => openImage(image),
+                          child: SizedBox(
+                            key: ValueKey('draft-image-${image.name}'),
+                            child: image.picture(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        tooltip: 'Remove ${image.name}',
+                        style: IconButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                        onPressed: () =>
+                            setState(() => imageDrafts.remove(image)),
+                        icon: const Icon(Icons.close, size: 20),
+                      ),
+                    ),
+                  ]),
+                ),
+              ),
+          ],
+        ),
+      );
 
   String durationLabel(Duration duration) =>
       '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
@@ -321,13 +469,36 @@ class _DemoHomeState extends State<_DemoHome> {
     return '${sender == null ? '' : '$sender: '}${message.text}';
   }
 
-  Widget messageContent(_DemoMessage message) {
+  Widget messageContent(_DemoMessage message,
+      {required double maxImageWidth, required double maxImageHeight}) {
+    final photo = message.image;
+    if (photo != null) {
+      return Tooltip(
+        message: 'Open image ${photo.name}',
+        child: Semantics(
+          button: true,
+          label: 'Open image ${photo.name}',
+          child: GestureDetector(
+            onTap: () => openImage(photo),
+            child: ConstrainedBox(
+              key: ValueKey('message-image-${photo.name}'),
+              constraints: BoxConstraints(
+                maxWidth: maxImageWidth,
+                maxHeight: maxImageHeight,
+              ),
+              child: AspectRatio(
+                  aspectRatio: photo.width / photo.height,
+                  child: photo.picture()),
+            ),
+          ),
+        ),
+      );
+    }
     final clip = message.voice;
     if (clip == null) return Text(message.text);
     return Row(mainAxisSize: MainAxisSize.min, children: [
       IconButton(
-        tooltip:
-            identical(playing, clip) ? 'Stop playback' : 'Play voice note',
+        tooltip: identical(playing, clip) ? 'Stop playback' : 'Play voice note',
         onPressed: () => playVoice(clip),
         icon: Icon(identical(playing, clip) ? Icons.stop : Icons.play_arrow),
       ),
@@ -336,6 +507,19 @@ class _DemoHomeState extends State<_DemoHome> {
   }
 
   Widget composer() => Column(mainAxisSize: MainAxisSize.min, children: [
+        if (imageDrafts.isNotEmpty) imageDraftStrip(),
+        if (pickingImages)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text('Opening images…',
+                style: Theme.of(context).textTheme.bodySmall),
+          ),
+        if (imageError != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child:
+                Text(imageError!, style: Theme.of(context).textTheme.bodySmall),
+          ),
         if (voiceError != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -347,21 +531,8 @@ class _DemoHomeState extends State<_DemoHome> {
         else
           Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
             IconButton(
-              tooltip: 'Demo attachments',
-              onPressed: () => showDialog<void>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  scrollable: true,
-                  title: const Text('Attachments'),
-                  content: const Text(
-                      'This local demo supports voice notes. File uploads are available in the full Android app.'),
-                  actions: [
-                    TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('BACK'))
-                  ],
-                ),
-              ),
+              tooltip: 'Add images',
+              onPressed: pickingImages ? null : pickImages,
               icon: const Icon(Icons.add),
             ),
             Expanded(
@@ -377,13 +548,13 @@ class _DemoHomeState extends State<_DemoHome> {
             SizedBox(
                 width: 62,
                 height: 48,
-                child: draft.text.trim().isEmpty
+                child: draft.text.trim().isEmpty && imageDrafts.isEmpty
                     ? IconButton(
                         tooltip: 'Record voice note',
-                        onPressed: startVoice,
+                        onPressed: pickingImages ? null : startVoice,
                         icon: const Icon(Icons.mic_none))
                     : TextButton(
-                        onPressed: sendLocally,
+                        onPressed: pickingImages ? null : sendLocally,
                         child: const FittedBox(
                             fit: BoxFit.scaleDown,
                             child:
@@ -505,79 +676,102 @@ class _DemoHomeState extends State<_DemoHome> {
                           onChanged: (value) => setState(() => query = value),
                         )),
                   Expanded(
-                      child: thread == null
-                          ? (filtered.isEmpty
-                              ? const Center(
-                                  child: Text('No conversations found.'))
-                              : ListView(children: [
-                                  for (final item in filtered)
-                                    LightConversationRow(
-                                      title: Text(item.name),
-                                      preview: Text(previewFor(item)),
-                                      timestamp:
-                                          item.messages.isEmpty ? '' : 'Today',
-                                      unread: item.unread,
-                                      pinned: item.pinned,
-                                      muted: item.muted,
-                                      onTap: () => openThread(item),
-                                    ),
-                                ]))
-                          : (thread.messages.isEmpty
-                              ? const Center(
-                                  child: Text('Write a message to try it.'))
-                              : ListView(
-                                  controller: transcript,
-                                  padding: const EdgeInsets.all(18),
-                                  children: [
-                                    for (final message in thread.messages)
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 18),
-                                        child: Align(
-                                          alignment: message.fromMe
-                                              ? Alignment.centerRight
-                                              : Alignment.centerLeft,
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment: message.fromMe
-                                                ? CrossAxisAlignment.end
-                                                : CrossAxisAlignment.start,
-                                            children: [
-                                              if (thread.isGroup)
-                                                LightMessageSender(
-                                                    isFromMe: message.fromMe,
-                                                    name: message.fromMe
-                                                        ? 'You'
-                                                        : message.sender ??
-                                                            thread.name),
-                                              LightMessageSurface(
-                                                isFromMe: message.fromMe,
-                                                constraints: BoxConstraints(
-                                                    maxWidth:
-                                                        constraints.maxWidth -
-                                                            36),
-                                                child: messageContent(message),
-                                              ),
-                                            ],
+                    child: LayoutBuilder(
+                      builder: (context, contentBounds) => Column(children: [
+                        Expanded(
+                            child: thread == null
+                                ? (filtered.isEmpty
+                                    ? const Center(
+                                        child: Text('No conversations found.'))
+                                    : ListView(children: [
+                                        for (final item in filtered)
+                                          LightConversationRow(
+                                            title: Text(item.name),
+                                            preview: Text(previewFor(item)),
+                                            timestamp: item.messages.isEmpty
+                                                ? ''
+                                                : 'Today',
+                                            unread: item.unread,
+                                            pinned: item.pinned,
+                                            muted: item.muted,
+                                            onTap: () => openThread(item),
                                           ),
-                                        ),
-                                      )
-                                  ],
-                                ))),
-                  if (thread != null)
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                          maxHeight:
-                              (constraints.maxHeight * 0.65).clamp(48, 300)),
-                      child: LightComposerViewport(
-                          child: SafeArea(
-                              top: false,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 8),
-                                child: composer(),
-                              ))),
+                                      ]))
+                                : (thread.messages.isEmpty
+                                    ? const Center(
+                                        child:
+                                            Text('Write a message to try it.'))
+                                    : ListView(
+                                        controller: transcript,
+                                        padding: const EdgeInsets.all(18),
+                                        children: [
+                                          for (final message in thread.messages)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 18),
+                                              child: Align(
+                                                alignment: message.fromMe
+                                                    ? Alignment.centerRight
+                                                    : Alignment.centerLeft,
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment: message
+                                                          .fromMe
+                                                      ? CrossAxisAlignment.end
+                                                      : CrossAxisAlignment
+                                                          .start,
+                                                  children: [
+                                                    if (thread.isGroup)
+                                                      LightMessageSender(
+                                                          isFromMe:
+                                                              message.fromMe,
+                                                          name: message.fromMe
+                                                              ? 'You'
+                                                              : message
+                                                                      .sender ??
+                                                                  thread.name),
+                                                    LightMessageSurface(
+                                                      isFromMe: message.fromMe,
+                                                      constraints: BoxConstraints(
+                                                          maxWidth: constraints
+                                                                  .maxWidth -
+                                                              36),
+                                                      child: messageContent(
+                                                          message,
+                                                          maxImageWidth:
+                                                              constraints
+                                                                      .maxWidth *
+                                                                  0.5,
+                                                          maxImageHeight:
+                                                              constraints
+                                                                      .maxHeight *
+                                                                  0.6),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                        ],
+                                      ))),
+                        if (thread != null)
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                                maxHeight: (contentBounds.maxHeight * 0.65)
+                                    .clamp(48.0, 300.0)
+                                    .clamp(0.0, contentBounds.maxHeight)),
+                            child: LightComposerViewport(
+                                child: SafeArea(
+                                    top: false,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 8),
+                                      child: composer(),
+                                    ))),
+                          ),
+                      ]),
                     ),
+                  ),
                 ])),
         bottomNavigationBar: thread != null
             ? null

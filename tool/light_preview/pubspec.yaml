@@ -12,6 +12,8 @@ dev_dependencies:
     sdk: flutter
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/sample-image.png
   fonts:
     - family: Inter
       fonts:
