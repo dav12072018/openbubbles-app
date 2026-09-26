@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../lib/app/components/light/light_composer_viewport.dart';
 import '../../lib/app/components/light/light_conversation_row.dart';
@@ -12,12 +14,17 @@ import 'voice/voice_factory.dart';
 import 'recipient_picker.dart';
 import 'images/image_factory.dart';
 import 'images/image_preview.dart';
+import 'demo_keyboard.dart';
 
 /// Standalone, in-memory UI demo. It has no messaging or account services.
 class LightDemoApp extends StatefulWidget {
-  const LightDemoApp({super.key, this.voiceCapture, this.imagePicker});
+  const LightDemoApp(
+      {super.key, this.voiceCapture, this.imagePicker, this.simulateKeyboard});
   final LocalVoiceCapture? voiceCapture;
   final LocalImagePicker? imagePicker;
+
+  /// Desktop browsers have no phone IME. Mobile and Android use the system IME.
+  final bool? simulateKeyboard;
 
   @override
   State<LightDemoApp> createState() => _LightDemoAppState();
@@ -34,6 +41,10 @@ class _LightDemoAppState extends State<LightDemoApp> {
         home: _DemoHome(
           voiceCapture: widget.voiceCapture,
           imagePicker: widget.imagePicker,
+          simulateKeyboard: widget.simulateKeyboard ??
+              (kIsWeb &&
+                  defaultTargetPlatform != TargetPlatform.android &&
+                  defaultTargetPlatform != TargetPlatform.iOS),
           brightness: brightness,
           toggleBrightness: () => setState(() => brightness =
               brightness == Brightness.dark
@@ -121,12 +132,14 @@ class _DemoHome extends StatefulWidget {
   const _DemoHome(
       {required this.brightness,
       required this.toggleBrightness,
+      required this.simulateKeyboard,
       this.voiceCapture,
       this.imagePicker});
   final Brightness brightness;
   final VoidCallback toggleBrightness;
   final LocalVoiceCapture? voiceCapture;
   final LocalImagePicker? imagePicker;
+  final bool simulateKeyboard;
 
   @override
   State<_DemoHome> createState() => _DemoHomeState();
@@ -138,6 +151,7 @@ class _DemoHomeState extends State<_DemoHome> {
   bool searching = false;
   String query = '';
   final draft = TextEditingController();
+  final draftFocus = FocusNode(debugLabel: 'Demo message');
   final search = TextEditingController();
   final transcript = ScrollController();
   late final LocalVoiceCapture voiceCapture;
@@ -162,13 +176,33 @@ class _DemoHomeState extends State<_DemoHome> {
     super.initState();
     voiceCapture = widget.voiceCapture ?? createLocalVoiceCapture();
     imagePicker = widget.imagePicker ?? createLocalImagePicker();
+    draftFocus.addListener(onDraftFocusChanged);
+    draftFocus.onKeyEvent = (node, event) {
+      if (widget.simulateKeyboard &&
+          event is KeyDownEvent &&
+          event.logicalKey == LogicalKeyboardKey.escape) {
+        hideKeyboard();
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    };
   }
+
+  void onDraftFocusChanged() {
+    if (!mounted) return;
+    setState(() {});
+    if (draftFocus.hasFocus) scrollToLatest();
+  }
+
+  void hideKeyboard() => draftFocus.unfocus();
 
   @override
   void dispose() {
     recordingTimer?.cancel();
     voiceCapture.dispose();
     imagePicker.dispose();
+    draftFocus.removeListener(onDraftFocusChanged);
+    draftFocus.dispose();
     draft.dispose();
     search.dispose();
     transcript.dispose();
@@ -232,6 +266,7 @@ class _DemoHomeState extends State<_DemoHome> {
 
   Future<void> pickImages() async {
     if (selected == null || pickingImages) return;
+    hideKeyboard();
     final session = ++imageSession;
     setState(() {
       pickingImages = true;
@@ -284,8 +319,8 @@ class _DemoHomeState extends State<_DemoHome> {
     if (imageViewerOpen) return;
     imageViewerOpen = true;
     FocusScope.of(context).unfocus();
-    final route = MaterialPageRoute<void>(
-        builder: (_) => DemoImageViewer(image: image));
+    final route =
+        MaterialPageRoute<void>(builder: (_) => DemoImageViewer(image: image));
     try {
       await Navigator.of(context).push(route);
       await route.completed;
@@ -515,7 +550,8 @@ class _DemoHomeState extends State<_DemoHome> {
     ]);
   }
 
-  Widget composer() => Column(mainAxisSize: MainAxisSize.min, children: [
+  Widget composer() => TextFieldTapRegion(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
         if (imageDrafts.isNotEmpty) imageDraftStrip(),
         if (pickingImages)
           Padding(
@@ -548,6 +584,9 @@ class _DemoHomeState extends State<_DemoHome> {
                 child: TextField(
               key: const ValueKey('demo-draft'),
               controller: draft,
+              focusNode: draftFocus,
+              keyboardType: TextInputType.multiline,
+              textInputAction: TextInputAction.newline,
               minLines: 1,
               maxLines: 4,
               onChanged: (_) => setState(() {}),
@@ -569,7 +608,7 @@ class _DemoHomeState extends State<_DemoHome> {
                             child:
                                 Text('SEND', style: TextStyle(fontSize: 14))))),
           ]),
-      ]);
+      ]));
 
   Future<void> createThread() async {
     final recipients = await Navigator.of(context).push<List<DemoRecipient>>(
@@ -582,40 +621,43 @@ class _DemoHomeState extends State<_DemoHome> {
     openThread(thread);
   }
 
-  void menu() => showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        builder: (sheetContext) => SafeArea(
-          child: SingleChildScrollView(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Padding(
-              padding: EdgeInsets.all(20),
-              child: Text(
-                  'Local demo\nMessages stay here. Nothing is sent to anyone. Changes reset when you reload.',
-                  textAlign: TextAlign.center),
-            ),
-            ListTile(
-              title: Text(widget.brightness == Brightness.dark
-                  ? 'Use light appearance'
-                  : 'Use dark appearance'),
+  void menu() {
+    hideKeyboard();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+                'Local demo\nMessages stay here. Nothing is sent to anyone. Changes reset when you reload.',
+                textAlign: TextAlign.center),
+          ),
+          ListTile(
+            title: Text(widget.brightness == Brightness.dark
+                ? 'Use light appearance'
+                : 'Use dark appearance'),
+            onTap: () {
+              Navigator.pop(sheetContext);
+              widget.toggleBrightness();
+            },
+          ),
+          ListTile(
+              title: const Text('Reset sample conversations'),
               onTap: () {
                 Navigator.pop(sheetContext);
-                widget.toggleBrightness();
-              },
-            ),
-            ListTile(
-                title: const Text('Reset sample conversations'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  setState(() => threads = _sampleThreads());
-                  back();
-                }),
-            ListTile(
-                title: const Text('Back to demo'),
-                onTap: () => Navigator.pop(sheetContext)),
-          ])),
-        ),
-      );
+                setState(() => threads = _sampleThreads());
+                back();
+              }),
+          ListTile(
+              title: const Text('Back to demo'),
+              onTap: () => Navigator.pop(sheetContext)),
+        ])),
+      ),
+    );
+  }
 
   Widget action(String label, VoidCallback callback) => Expanded(
         child: TextButton(
@@ -633,6 +675,10 @@ class _DemoHomeState extends State<_DemoHome> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final thread = selected;
+    final showKeyboard = widget.simulateKeyboard &&
+        thread != null &&
+        draftFocus.hasFocus &&
+        MediaQuery.viewInsetsOf(context).bottom == 0;
     final filtered = threads
         .where((item) =>
             '${item.name} ${item.messages.map((message) => message.text).join(' ')}'
@@ -642,7 +688,13 @@ class _DemoHomeState extends State<_DemoHome> {
     return PopScope(
       canPop: selected == null && !searching,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) back();
+        if (!didPop) {
+          if (showKeyboard) {
+            hideKeyboard();
+          } else {
+            back();
+          }
+        }
       },
       child: Scaffold(
         appBar: AppBar(
@@ -783,7 +835,17 @@ class _DemoHomeState extends State<_DemoHome> {
                   ),
                 ])),
         bottomNavigationBar: thread != null
-            ? null
+            ? (showKeyboard
+                ? LayoutBuilder(
+                    builder: (context, bounds) => DemoKeyboard(
+                      height: (bounds.maxHeight - 230)
+                          .clamp(100.0, DemoKeyboard.defaultHeight),
+                      controller: draft,
+                      onChanged: () => setState(() {}),
+                      onHide: hideKeyboard,
+                    ),
+                  )
+                : null)
             : SafeArea(
                 top: false,
                 child: Container(

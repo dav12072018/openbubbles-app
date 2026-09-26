@@ -12,6 +12,8 @@ When the draft is empty, the microphone starts a **local browser voice recording
 
 On desktop the demo uses a 360 × 413 phone viewport; on smaller screens it fills the available window. The original screenshot fixtures and component checks remain separate.
 
+In a desktop browser, tapping the message field opens a clickable **preview keyboard** underneath the composer. You can also type with your computer keyboard. Shift, numbers/symbols, space, return and backspace edit the draft; HIDE or Escape dismisses the keyboard without clearing the message. This is a simulator control, not an Android keyboard replacement. Android and mobile browsers use the device's default keyboard; the desktop preview is suppressed when a system keyboard inset is present.
+
 ```sh
 flutter pub get
 flutter build web --web-renderer html --pwa-strategy=none --target demo_main.dart
@@ -44,3 +46,5 @@ Demo interaction checks inject a fake microphone adapter and cover record/stop/c
 Recipient checks cover name/email/phone autocomplete, multiple selections, removal, duplicate prevention, manual addresses, pending-address inclusion, validation, cancellation, and reaching NEXT above the keyboard at 360 × 413 with 1.6× text.
 
 Image checks use an injected file picker and real PNG bytes to cover preview/removal, image-only and mixed-text sends, received/sent alignment, fullscreen zoom, decoding errors, and compact keyboard layouts without opening personal files.
+
+Desktop keyboard checks cover mouse focus, sending above the keyboard, hiding/reopening without losing a draft, system-keyboard suppression, compact layouts, text selection replacement, Unicode backspace, case and symbol keys.
