@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../lib/app/components/light/light_conversation_row.dart';
 import '../../../lib/app/components/light/light_message_surface.dart';
-import '../../../lib/app/components/light/light_message_sender.dart';
 import '../../../lib/app/components/light/light_voice_note_controls.dart';
 import '../../../lib/app/components/light/light_theme.dart';
 
@@ -152,8 +151,6 @@ class _FixtureConversation extends StatelessWidget {
               crossAxisAlignment:
                   fromMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
-                if (fromMe)
-                  const LightMessageSender(name: 'You', isFromMe: true),
                 LightMessageSurface(
                   isFromMe: fromMe,
                   constraints: const BoxConstraints(maxWidth: 324),

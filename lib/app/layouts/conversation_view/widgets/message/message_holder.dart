@@ -304,7 +304,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                           // show sender, if needed
                           if (!message.isGroupEvent
                               && (isLight
-                                  ? chat.isGroup || message.isFromMe!
+                                  ? chat.isGroup
                                   : chat.isGroup && !message.isFromMe! && showSender)
                               && e.part == (messageParts.firstWhereOrNull((e) => !e.isUnsent)?.part))
                             Padding(

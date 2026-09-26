@@ -51,7 +51,7 @@ On the reference preview, Copy is approximately 20.7 sp, Fine 17.2 sp, and Detai
 
 These are visual references, not a reason to remove OpenBubbles functionality. Conversation selection, search, compose, unread indicators, message sending, attachments, accessibility, and system back navigation must remain functional. Sender/recipient distinctions should remain understandable without relying on color.
 
-The transcript uses plain text without borders or outgoing fills. Incoming messages align left; sent messages and their captions align right. Group messages show a smaller sender caption above every message; outgoing messages use “You.” The empty composer exposes a microphone, switching to SEND for a text or attachment draft. Voice notes have explicit stop/cancel controls and a playback review before sending.
+The transcript uses plain text without borders or outgoing fills. Incoming messages align left; sent messages align right. One-to-one conversations have no sender captions. Group messages show a smaller sender caption above every message, with “You” above outgoing messages. The empty composer exposes a microphone, switching to SEND for a text or attachment draft. Voice notes have explicit stop/cancel controls and a playback review before sending.
 
 ## Fonts, assets, and platform boundary
 

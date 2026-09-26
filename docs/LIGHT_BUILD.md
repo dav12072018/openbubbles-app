@@ -31,7 +31,7 @@ New Android installations default to **Light**. A saved App Skin preference is r
 
 The Light header's overflow menu retains call/email and chat actions. FaceTime actions remain in conversation details. Long-press a conversation to select it; the bottom actions support read/unread, archive, pin, mute, and delete. Recently deleted conversations use the upstream recovery dialog.
 
-Messages are plain text: incoming messages align left and sent messages align right, with smaller sender names above group messages and “You” above outgoing messages. With an empty composer, tap the microphone to record a voice note. STOP opens playback review; DISCARD removes it and SEND uses the existing audio-message queue. Microphone access is requested when you start recording.
+Messages are plain text: incoming messages align left and sent messages align right. Sender captions appear only in group conversations, with names above incoming messages and “You” above outgoing messages. With an empty composer, tap the microphone to record a voice note. STOP opens playback review; DISCARD removes it and SEND uses the existing audio-message queue. Microphone access is requested when you start recording.
 
 The [interactive browser demo](../tool/light_preview/README.md) supports sample conversations and local microphone recordings without an account. Its recordings stay in memory and disappear on reload; they are never sent to the messaging service.
 

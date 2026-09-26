@@ -109,7 +109,8 @@ void main() {
         of: find.text('Voice note · 00:03'),
         matching: find.byType(LightMessageSurface));
     expect(tester.getRect(voiceSurface).right, closeTo(342, 0.01));
-    expect(tester.getRect(find.text('You').last).right, closeTo(342, 0.01));
+    expect(find.byType(LightMessageSender), findsNothing);
+    expect(find.text('You'), findsNothing);
     await tester.tap(find.byTooltip('Play voice note'));
     await tester.pumpAndSettle();
     expect(capture.plays, 2);
@@ -188,7 +189,7 @@ void main() {
   for (final thread in ['Alex Morgan', 'Saturday walk']) {
     for (final scale in [1.0, 1.6]) {
       testWidgets(
-          '$thread newly sent wrapped text and You caption align right at ${scale}x',
+          '$thread wrapped sent text aligns right with captions only for groups at ${scale}x',
           (tester) async {
         tester.view.physicalSize = const Size(360, 800);
         tester.view.devicePixelRatio = 1;
@@ -199,6 +200,10 @@ void main() {
         await tester.pumpWidget(LightDemoApp(voiceCapture: FakeVoiceCapture()));
         await tester.tap(find.text(thread));
         await tester.pumpAndSettle();
+        if (thread == 'Alex Morgan') {
+          expect(find.byType(LightMessageSender), findsNothing);
+          expect(find.text('You'), findsNothing);
+        }
         final incoming = thread == 'Alex Morgan'
             ? 'Meet you at the trailhead.'
             : 'I’ll bring the cups.';
@@ -222,9 +227,15 @@ void main() {
                 .localToGlobal(Offset(lines.last.right, lines.last.bottom))
                 .dx,
             closeTo(342, 0.01));
-        expect(tester.getRect(find.text('You').last).right, closeTo(342, 0.01));
-        expect(tester.getBottomLeft(find.text('You').last).dy,
-            lessThan(tester.getTopLeft(find.text(message)).dy));
+        if (thread == 'Saturday walk') {
+          expect(
+              tester.getRect(find.text('You').last).right, closeTo(342, 0.01));
+          expect(tester.getBottomLeft(find.text('You').last).dy,
+              lessThan(tester.getTopLeft(find.text(message)).dy));
+        } else {
+          expect(find.byType(LightMessageSender), findsNothing);
+          expect(find.text('You'), findsNothing);
+        }
         expect(tester.takeException(), isNull);
       });
     }

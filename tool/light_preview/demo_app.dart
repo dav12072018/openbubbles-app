@@ -543,8 +543,7 @@ class _DemoHomeState extends State<_DemoHome> {
                                                 ? CrossAxisAlignment.end
                                                 : CrossAxisAlignment.start,
                                             children: [
-                                              if (thread.isGroup ||
-                                                  message.fromMe)
+                                              if (thread.isGroup)
                                                 LightMessageSender(
                                                     isFromMe: message.fromMe,
                                                     name: message.fromMe
