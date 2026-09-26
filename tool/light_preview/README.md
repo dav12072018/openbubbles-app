@@ -4,6 +4,8 @@
 
 `demo_main.dart` runs a separate, interactive demo with in-memory sample conversations. Open a thread, type a message and press SEND, search, create a conversation, or use MENU to switch appearance and reset the sample data. Messages stay in this demo and are discarded on reload. It does not initialize accounts, network clients, or messaging services.
 
+NEW starts with a recipient picker. Type a name, phone number, or email to filter the fictional sample contacts; select a suggestion or add a complete phone number/email with + or Enter. Keep adding recipients for a group, remove any with ×, then press NEXT to write a message. NEXT also includes a complete address still in the field. The Android app uses OpenBubbles’ existing picker and the device’s actual contacts.
+
 When the draft is empty, the microphone starts a **local browser voice recording**. Browser microphone permission is requested only when you press it. STOP opens review controls to PLAY, CANCEL, or SEND into the local sample conversation; sent voice notes can be played again. During playback, STOP ends playback; PLAY starts again from the beginning. Recordings stay in memory, are never uploaded, and disappear on reset or reload. Use localhost or HTTPS for browser microphone access. The demo uses the production plain-text message surface and small sender captions; all messages align left.
 
 On desktop the demo uses a 360 × 413 phone viewport; on smaller screens it fills the available window. The original screenshot fixtures and component checks remain separate.
@@ -36,3 +38,5 @@ The last command writes real Flutter renders to `previews/`, at logical sizes 36
 Checks cover monochrome colors and text/action contrast, both brightness modes, large accessibility text at 1.6×, short and tall screens, scrolling to the final row/message, row callbacks, unread/pinned/muted/selected semantics, and message contrast/direction/selection. Tests import the production `LightComposerViewport` and mirror its non-flex constrained integration to verify that the send action remains reachable on the short display with a 200 dp keyboard, attachments, reply content, and 1.6× text. A tall-screen regression ensures a short composer leaves all remaining height to the transcript. The preview loads Inter directly from the app's existing font file and Material Icons from Flutter's bundle.
 
 Demo interaction checks inject a fake microphone adapter and cover record/stop/cancel/review/play/send, permission failure and late permission cancellation, and group sender alignment. Automated checks never activate a real microphone. The web implementation uses browser `getUserMedia`, `MediaRecorder`, and local blob playback without additional packages.
+
+Recipient checks cover name/email/phone autocomplete, multiple selections, removal, duplicate prevention, manual addresses, pending-address inclusion, validation, cancellation, and reaching NEXT above the keyboard at 360 × 413 with 1.6× text.

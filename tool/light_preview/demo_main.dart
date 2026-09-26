@@ -19,7 +19,7 @@ class _DemoFrame extends StatelessWidget {
               SizedBox(
                   width: 360,
                   height: (constraints.maxHeight - 100).clamp(200.0, 413.0),
-                  child: const LightDemoApp()),
+                  child: const ClipRect(child: LightDemoApp())),
               const Padding(
                   padding: EdgeInsets.only(top: 18),
                   child: Text(

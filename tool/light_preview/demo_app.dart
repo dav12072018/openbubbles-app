@@ -8,6 +8,7 @@ import '../../lib/app/components/light/light_message_surface.dart';
 import '../../lib/app/components/light/light_message_sender.dart';
 import '../../lib/app/components/light/light_theme.dart';
 import 'voice/voice_factory.dart';
+import 'recipient_picker.dart';
 
 /// Standalone, in-memory UI demo. It has no messaging or account services.
 class LightDemoApp extends StatefulWidget {
@@ -50,13 +51,15 @@ class _DemoThread {
       {this.unread = false,
       this.pinned = false,
       this.muted = false,
-      this.isGroup = false});
+      this.isGroup = false,
+      this.recipients = const []});
   final String name;
   final List<_DemoMessage> messages;
   bool unread;
   final bool pinned;
   final bool muted;
   final bool isGroup;
+  final List<DemoRecipient> recipients;
 }
 
 List<_DemoThread> _sampleThreads() => [
@@ -389,37 +392,12 @@ class _DemoHomeState extends State<_DemoHome> {
       ]);
 
   Future<void> createThread() async {
-    String name = '';
-    final result = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        scrollable: true,
-        title: const Text('New demo conversation'),
-        content: TextField(
-          autofocus: true,
-          onChanged: (value) => name = value,
-          decoration: const InputDecoration(labelText: 'Name'),
-          textCapitalization: TextCapitalization.words,
-          onSubmitted: (value) {
-            if (value.trim().isNotEmpty)
-              Navigator.pop(dialogContext, value.trim());
-          },
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('CANCEL')),
-          TextButton(
-              onPressed: () {
-                if (name.trim().isNotEmpty)
-                  Navigator.pop(dialogContext, name.trim());
-              },
-              child: const Text('CREATE')),
-        ],
-      ),
-    );
-    if (!mounted || result == null) return;
-    final thread = _DemoThread(result, []);
+    final recipients = await Navigator.of(context).push<List<DemoRecipient>>(
+        MaterialPageRoute(builder: (_) => const DemoRecipientPicker()));
+    if (!mounted || recipients == null || recipients.isEmpty) return;
+    final thread = _DemoThread(
+        recipients.map((recipient) => recipient.name).join(', '), [],
+        isGroup: recipients.length > 1, recipients: recipients);
     setState(() => threads.insert(0, thread));
     openThread(thread);
   }

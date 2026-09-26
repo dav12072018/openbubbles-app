@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../demo_app.dart';
+import '../recipient_picker.dart';
 
 void main() {
   testWidgets('open, write locally, return and search sample conversations',
@@ -50,10 +51,17 @@ void main() {
     await tester.pumpWidget(const LightDemoApp());
     await tester.tap(find.text('NEW'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Casey');
-    await tester.tap(find.text('CREATE'));
+    await tester.enterText(
+        find.byKey(const ValueKey('demo-recipient-query')), 'Casey');
+    await tester.pumpAndSettle();
+    final casey =
+        demoContacts.firstWhere((contact) => contact.name == 'Casey Park');
+    await tester
+        .tap(find.byKey(ValueKey('recipient-suggestion-${casey.address}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('demo-recipient-next')));
     await tester.pumpAndSettle(const Duration(milliseconds: 300));
-    expect(find.text('Casey'), findsOneWidget);
+    expect(find.text('Casey Park'), findsOneWidget);
     expect(find.text('Write a message to try it.'), findsOneWidget);
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
@@ -65,12 +73,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Back to demo'));
     await tester.pumpAndSettle();
-    expect(find.text('Casey'), findsOneWidget);
+    expect(find.text('Casey Park'), findsOneWidget);
     await tester.tap(find.byTooltip('Menu'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Reset sample conversations'));
     await tester.pumpAndSettle();
-    expect(find.text('Casey'), findsNothing);
+    expect(find.text('Casey Park'), findsNothing);
     expect(find.text('Alex Morgan'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
