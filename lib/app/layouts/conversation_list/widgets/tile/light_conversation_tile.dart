@@ -102,22 +102,16 @@ class _LightConversationTileState extends CustomState<LightConversationTile,
                   ChatSubtitle(
                     parentController: controller,
                     maxLines: 1,
-                    style: TextStyle(
-                        color: foreground,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w400,
-                        height: 1.3),
+                    style: LightConversationRow.previewTextStyle
+                        .copyWith(color: foreground),
                   );
 
       return LightConversationRow(
         title: ChatTitle(
           parentController: controller,
           maxLines: 1,
-          style: TextStyle(
-              color: foreground,
-              fontSize: 21,
-              fontWeight: FontWeight.w400,
-              height: 1.25),
+          style:
+              LightConversationRow.titleTextStyle.copyWith(color: foreground),
         ),
         preview: preview,
         timestamp: widget.deletedMode

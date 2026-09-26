@@ -46,56 +46,55 @@ class _FixtureInbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 48,
-          title: const Text('Messages'),
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 7),
-              child: Text(
-                'COMPONENT PREVIEW · SAMPLE DATA',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelSmall,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 7),
+                child: Text(
+                  'COMPONENT PREVIEW · SAMPLE DATA',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
               ),
-            ),
-            Expanded(
-              child: ListView(
-                children: const [
-                  LightConversationRow(
-                    title: Text('Alex Morgan'),
-                    preview: Text('Meet you at the trailhead.'),
-                    timestamp: '10:42',
-                    unread: true,
-                  ),
-                  LightConversationRow(
-                    title: Text('Saturday walk'),
-                    preview: Text('Jamie: I can bring coffee.'),
-                    timestamp: '9:15',
-                    pinned: true,
-                  ),
-                  LightConversationRow(
-                    title: Text('Sam Rivera'),
-                    preview: Text('You: Sounds good, see you then.'),
-                    timestamp: 'Yesterday',
-                    deliveryStatus: 'Read',
-                  ),
-                  LightConversationRow(
-                    title: Text('Neighborhood garden'),
-                    preview: Text('The tomatoes are ready to pick.'),
-                    timestamp: 'Tue',
-                    muted: true,
-                  ),
-                  LightConversationRow(
-                    title: Text('Taylor'),
-                    preview: Text('Thanks for the book!'),
-                    timestamp: 'Mon',
-                  ),
-                ],
+              Expanded(
+                child: ListView(
+                  children: const [
+                    LightConversationRow(
+                      title: Text('Alex Morgan'),
+                      preview: Text('Meet you at the trailhead.'),
+                      timestamp: '10:42',
+                      unread: true,
+                    ),
+                    LightConversationRow(
+                      title: Text('Saturday walk'),
+                      preview: Text('Jamie: I can bring coffee.'),
+                      timestamp: '9:15',
+                      pinned: true,
+                    ),
+                    LightConversationRow(
+                      title: Text('Sam Rivera'),
+                      preview: Text('You: Sounds good, see you then.'),
+                      timestamp: 'Yesterday',
+                      deliveryStatus: 'Read',
+                    ),
+                    LightConversationRow(
+                      title: Text('Neighborhood garden'),
+                      preview: Text('The tomatoes are ready to pick.'),
+                      timestamp: 'Tue',
+                      muted: true,
+                    ),
+                    LightConversationRow(
+                      title: Text('Taylor'),
+                      preview: Text('Thanks for the book!'),
+                      timestamp: 'Mon',
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         bottomNavigationBar: SafeArea(
           top: false,

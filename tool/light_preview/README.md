@@ -10,6 +10,8 @@ Open **Image preview** to inspect received and sent sample images. Tap an image 
 
 When the draft is empty, the microphone starts a **local browser voice recording**. Browser microphone permission is requested only when you press it. STOP opens review controls to PLAY, CANCEL, or SEND into the local sample conversation; sent voice notes can be played again. During playback, STOP ends playback; PLAY starts again from the beginning. Recordings stay in memory, are never uploaded, and disappear on reset or reload. Use localhost or HTTPS for browser microphone access. The demo uses the production plain-text message surface and small sender captions; incoming messages align left and sent messages align right.
 
+The compact inbox omits the redundant Messages header. Names and previews use rounded LP3 Paragraph/Detail sizes of 17/14, with 14 horizontal and 10 vertical padding, a 6 gap, and a 72 minimum row height that grows for accessibility text. Native filtered inboxes and selection keep their context/back/cancel header.
+
 On desktop the demo uses a 360 × 413 phone viewport; on smaller screens it fills the available window. The original screenshot fixtures and component checks remain separate.
 
 In a desktop browser, tapping the message field opens a clickable **preview keyboard** underneath the composer. You can also type with your computer keyboard. Shift, numbers/symbols, space, return and backspace edit the draft; HIDE or Escape dismisses the keyboard without clearing the message. This is a simulator control, not an Android keyboard replacement. Android and mobile browsers use the device's default keyboard; the desktop preview is suppressed when a system keyboard inset is present.
@@ -26,7 +28,7 @@ Open `http://127.0.0.1:8765`. The HTML renderer avoids CanvasKit CDN downloads. 
 
 This small Flutter package imports the production `light_theme.dart`, `light_conversation_row.dart`, and `light_message_surface.dart` files directly. It needs only Flutter, so it can exercise the visual components without the main app's native messaging, Firebase, Rust, and database dependencies.
 
-The preview is a **component lab with fictional sample data**, not a screenshot of the complete running Android app. Its heading, actions, and composer are fixture scaffolding matched to the implemented inbox (48 dp header; 54 dp SEARCH / NEW / MENU bar) and conversation (56 dp header; back/more actions; attachment and SEND composer). Live app integration, authentication, message sync, and sending require separate Android checks.
+The preview is a **component lab with fictional sample data**, not a screenshot of the complete running Android app. Its actions and composer are fixture scaffolding matched to the implemented inbox (no main title bar; 54 dp SEARCH / NEW / MENU bar) and conversation (56 dp header; back/more actions; attachment and SEND composer). Live app integration, authentication, message sync, and sending require separate Android checks.
 
 From this directory, using Flutter 3.24.0:
 

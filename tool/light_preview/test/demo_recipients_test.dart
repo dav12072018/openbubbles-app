@@ -148,7 +148,9 @@ void main() {
     expect(tester.widget<TextButton>(recipientNext).onPressed, isNull);
     await tester.tap(find.byTooltip('Cancel new conversation'));
     await tester.pumpAndSettle();
-    expect(find.text('Messages'), findsOneWidget);
+    expect(find.text('Messages'), findsNothing);
+    expect(find.text('SEARCH').hitTestable(), findsOneWidget);
+    expect(find.text('Alex Morgan').hitTestable(), findsOneWidget);
     expect(find.text('Casey Park'), findsNothing);
     await tester.tap(find.text('NEW'));
     await tester.pumpAndSettle();

@@ -88,7 +88,9 @@ void main() {
     await typeWithKeyboard(tester, 'draft');
     await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
-    expect(find.text('Messages'), findsOneWidget);
+    expect(find.text('Messages'), findsNothing);
+    expect(find.text('NEW').hitTestable(), findsOneWidget);
+    expect(find.text('Sam Rivera').hitTestable(), findsOneWidget);
     expect(previewKeyboard, findsNothing);
     await tester.tap(find.text('Sam Rivera'));
     await tester.pumpAndSettle();

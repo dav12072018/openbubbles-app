@@ -78,40 +78,41 @@ class _LightConversationListState extends CustomState<LightConversationList,
         body: SafeArea(
           child: Column(
             children: [
-              Container(
-                height: 48,
-                decoration: BoxDecoration(border: Border(bottom: border)),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 52),
-                      child: Text(
-                        selecting ? '${selected.length} selected' : title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: foreground,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w400,
+              if (selecting || isSubpage)
+                Container(
+                  height: 48,
+                  decoration: BoxDecoration(border: Border(bottom: border)),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 52),
+                        child: Text(
+                          selecting ? '${selected.length} selected' : title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: foreground,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
-                    ),
-                    if (selecting || isSubpage)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          tooltip: selecting ? 'Cancel selection' : 'Back',
-                          onPressed: close,
-                          icon:
-                              Icon(selecting ? Icons.close : Icons.arrow_back),
+                      if (selecting || isSubpage)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            tooltip: selecting ? 'Cancel selection' : 'Back',
+                            onPressed: close,
+                            icon: Icon(
+                                selecting ? Icons.close : Icons.arrow_back),
+                          ),
                         ),
-                      ),
-                    if (!selecting)
-                      Positioned(right: 16, child: SyncIndicator(size: 12)),
-                  ],
+                      if (!selecting)
+                        Positioned(right: 16, child: SyncIndicator(size: 12)),
+                    ],
+                  ),
                 ),
-              ),
               Expanded(
                 child: Obx(() {
                   final items = controller.showDeletedMessages
@@ -205,7 +206,22 @@ class _LightConversationListState extends CustomState<LightConversationList,
                           ),
                           VerticalDivider(
                               width: 1, thickness: 0.5, color: foreground),
-                          Expanded(child: OverflowMenu(controller: controller)),
+                          Expanded(
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                OverflowMenu(controller: controller),
+                                if (!isSubpage)
+                                  Positioned(
+                                    top: 6,
+                                    right: 6,
+                                    child: IgnorePointer(
+                                      child: SyncIndicator(size: 10),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
               ),
@@ -224,7 +240,10 @@ class _LightConversationListState extends CustomState<LightConversationList,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         shape: const RoundedRectangleBorder(),
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        textStyle: Theme.of(context).textTheme.labelLarge!.copyWith(fontSize: 15, fontWeight: FontWeight.w400),
+        textStyle: Theme.of(context)
+            .textTheme
+            .labelLarge!
+            .copyWith(fontSize: 15, fontWeight: FontWeight.w400),
       ),
       child: FittedBox(fit: BoxFit.scaleDown, child: Text(label, maxLines: 1)),
     );

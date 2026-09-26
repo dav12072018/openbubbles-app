@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 /// A purely presentational inbox row, shared by the live inbox and UI previews.
 /// It deliberately does not depend on contacts, the database, or native services.
 class LightConversationRow extends StatelessWidget {
+  // Rounded LP3 preview sizes for the SDK's Paragraph and Detail text roles.
+  // Keep native ChatTitle/ChatSubtitle and the standalone preview in sync.
+  static const titleTextStyle =
+      TextStyle(fontSize: 17, fontWeight: FontWeight.w400, height: 1.25);
+  static const previewTextStyle =
+      TextStyle(fontSize: 14, fontWeight: FontWeight.w400, height: 1.45);
+
   const LightConversationRow({
     super.key,
     required this.title,
@@ -49,8 +56,8 @@ class LightConversationRow extends StatelessWidget {
           onLongPress: onLongPress,
           onSecondaryTapUp: onSecondaryTapUp,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 100),
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            constraints: const BoxConstraints(minHeight: 72),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               border: Border(
                   bottom: BorderSide(color: colors.onBackground, width: 0.5)),
@@ -67,11 +74,7 @@ class LightConversationRow extends StatelessWidget {
                     ],
                     Expanded(
                       child: DefaultTextStyle.merge(
-                        style: TextStyle(
-                            color: foreground,
-                            fontSize: 21,
-                            fontWeight: FontWeight.w400,
-                            height: 1.25),
+                        style: titleTextStyle.copyWith(color: foreground),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         child: title,
@@ -99,16 +102,12 @@ class LightConversationRow extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 9),
+                const SizedBox(height: 6),
                 Row(
                   children: [
                     Expanded(
                       child: DefaultTextStyle.merge(
-                        style: TextStyle(
-                            color: foreground,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w400,
-                            height: 1.3),
+                        style: previewTextStyle.copyWith(color: foreground),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         child: preview,

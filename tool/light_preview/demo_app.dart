@@ -697,143 +697,156 @@ class _DemoHomeState extends State<_DemoHome> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: thread == null ? 48 : 56,
-          leading: thread != null || searching
-              ? IconButton(
-                  tooltip: 'Back',
-                  onPressed: back,
-                  icon: const Icon(Icons.arrow_back))
-              : null,
-          title: Text(thread?.name ?? 'Messages',
-              maxLines: 1, overflow: TextOverflow.ellipsis),
-          actions: thread != null
-              ? [
-                  IconButton(
-                      tooltip: 'Menu',
-                      onPressed: menu,
-                      icon: const Icon(Icons.more_vert))
-                ]
-              : null,
-        ),
-        body: LayoutBuilder(
-            builder: (context, constraints) => Column(children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 7, horizontal: 8),
-                    child: Text('LOCAL DEMO · NO REAL SENDS',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.labelSmall),
-                  ),
-                  if (thread == null && searching)
-                    Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
-                        child: TextField(
-                          key: const ValueKey('demo-search'),
-                          controller: search,
-                          autofocus: true,
-                          decoration: const InputDecoration(
-                              hintText: 'Search conversations'),
-                          onChanged: (value) => setState(() => query = value),
-                        )),
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, contentBounds) => Column(children: [
-                        Expanded(
-                            child: thread == null
-                                ? (filtered.isEmpty
-                                    ? const Center(
-                                        child: Text('No conversations found.'))
-                                    : ListView(children: [
-                                        for (final item in filtered)
-                                          LightConversationRow(
-                                            title: Text(item.name),
-                                            preview: Text(previewFor(item)),
-                                            timestamp: item.messages.isEmpty
-                                                ? ''
-                                                : 'Today',
-                                            unread: item.unread,
-                                            pinned: item.pinned,
-                                            muted: item.muted,
-                                            onTap: () => openThread(item),
-                                          ),
-                                      ]))
-                                : (thread.messages.isEmpty
-                                    ? const Center(
-                                        child:
-                                            Text('Write a message to try it.'))
-                                    : ListView(
-                                        controller: transcript,
-                                        padding: const EdgeInsets.all(18),
-                                        children: [
-                                          for (final message in thread.messages)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 18),
-                                              child: Align(
-                                                alignment: message.fromMe
-                                                    ? Alignment.centerRight
-                                                    : Alignment.centerLeft,
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  crossAxisAlignment: message
-                                                          .fromMe
-                                                      ? CrossAxisAlignment.end
-                                                      : CrossAxisAlignment
-                                                          .start,
-                                                  children: [
-                                                    if (thread.isGroup)
-                                                      LightMessageSender(
+        appBar: thread == null && !searching
+            ? null
+            : AppBar(
+                toolbarHeight: thread == null ? 48 : 56,
+                leading: thread != null || searching
+                    ? IconButton(
+                        tooltip: 'Back',
+                        onPressed: back,
+                        icon: const Icon(Icons.arrow_back))
+                    : null,
+                title: Text(thread?.name ?? 'Search',
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                actions: thread != null
+                    ? [
+                        IconButton(
+                            tooltip: 'Menu',
+                            onPressed: menu,
+                            icon: const Icon(Icons.more_vert))
+                      ]
+                    : null,
+              ),
+        body: SafeArea(
+            bottom: false,
+            child: LayoutBuilder(
+                builder: (context, constraints) => Column(children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 7, horizontal: 8),
+                        child: Text('LOCAL DEMO · NO REAL SENDS',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.labelSmall),
+                      ),
+                      if (thread == null && searching)
+                        Padding(
+                            padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+                            child: TextField(
+                              key: const ValueKey('demo-search'),
+                              controller: search,
+                              autofocus: true,
+                              decoration: const InputDecoration(
+                                  hintText: 'Search conversations'),
+                              onChanged: (value) =>
+                                  setState(() => query = value),
+                            )),
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, contentBounds) =>
+                              Column(children: [
+                            Expanded(
+                                child: thread == null
+                                    ? (filtered.isEmpty
+                                        ? const Center(
+                                            child:
+                                                Text('No conversations found.'))
+                                        : ListView(children: [
+                                            for (final item in filtered)
+                                              LightConversationRow(
+                                                title: Text(item.name),
+                                                preview: Text(previewFor(item)),
+                                                timestamp: item.messages.isEmpty
+                                                    ? ''
+                                                    : 'Today',
+                                                unread: item.unread,
+                                                pinned: item.pinned,
+                                                muted: item.muted,
+                                                onTap: () => openThread(item),
+                                              ),
+                                          ]))
+                                    : (thread.messages.isEmpty
+                                        ? const Center(
+                                            child: Text(
+                                                'Write a message to try it.'))
+                                        : ListView(
+                                            controller: transcript,
+                                            padding: const EdgeInsets.all(18),
+                                            children: [
+                                              for (final message
+                                                  in thread.messages)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          bottom: 18),
+                                                  child: Align(
+                                                    alignment: message.fromMe
+                                                        ? Alignment.centerRight
+                                                        : Alignment.centerLeft,
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      crossAxisAlignment: message
+                                                              .fromMe
+                                                          ? CrossAxisAlignment
+                                                              .end
+                                                          : CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        if (thread.isGroup)
+                                                          LightMessageSender(
+                                                              isFromMe: message
+                                                                  .fromMe,
+                                                              name: message
+                                                                      .fromMe
+                                                                  ? 'You'
+                                                                  : message
+                                                                          .sender ??
+                                                                      thread
+                                                                          .name),
+                                                        LightMessageSurface(
                                                           isFromMe:
                                                               message.fromMe,
-                                                          name: message.fromMe
-                                                              ? 'You'
-                                                              : message
-                                                                      .sender ??
-                                                                  thread.name),
-                                                    LightMessageSurface(
-                                                      isFromMe: message.fromMe,
-                                                      constraints: BoxConstraints(
-                                                          maxWidth: constraints
-                                                                  .maxWidth -
-                                                              36),
-                                                      child: messageContent(
-                                                          message,
-                                                          maxImageWidth:
-                                                              constraints
-                                                                      .maxWidth *
-                                                                  0.5,
-                                                          maxImageHeight:
-                                                              constraints
-                                                                      .maxHeight *
-                                                                  0.6),
+                                                          constraints: BoxConstraints(
+                                                              maxWidth: constraints
+                                                                      .maxWidth -
+                                                                  36),
+                                                          child: messageContent(
+                                                              message,
+                                                              maxImageWidth:
+                                                                  constraints
+                                                                          .maxWidth *
+                                                                      0.5,
+                                                              maxImageHeight:
+                                                                  constraints
+                                                                          .maxHeight *
+                                                                      0.6),
+                                                        ),
+                                                      ],
                                                     ),
-                                                  ],
-                                                ),
-                                              ),
-                                            )
-                                        ],
-                                      ))),
-                        if (thread != null)
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                                maxHeight: (contentBounds.maxHeight * 0.65)
-                                    .clamp(48.0, 300.0)
-                                    .clamp(0.0, contentBounds.maxHeight)),
-                            child: LightComposerViewport(
-                                child: SafeArea(
-                                    top: false,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 8),
-                                      child: composer(),
-                                    ))),
-                          ),
-                      ]),
-                    ),
-                  ),
-                ])),
+                                                  ),
+                                                )
+                                            ],
+                                          ))),
+                            if (thread != null)
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                    maxHeight: (contentBounds.maxHeight * 0.65)
+                                        .clamp(48.0, 300.0)
+                                        .clamp(0.0, contentBounds.maxHeight)),
+                                child: LightComposerViewport(
+                                    child: SafeArea(
+                                        top: false,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 8),
+                                          child: composer(),
+                                        ))),
+                              ),
+                          ]),
+                        ),
+                      ),
+                    ]))),
         bottomNavigationBar: thread != null
             ? (showKeyboard
                 ? LayoutBuilder(
