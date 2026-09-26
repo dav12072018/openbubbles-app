@@ -103,7 +103,7 @@ void main() {
   });
 
   testWidgets(
-      'sample incoming and sent images preserve fit, direction and fullscreen viewing',
+      'sample images preserve fit and direction; double tap opens only one reopenable viewer',
       (tester) async {
     final picker = FakeImagePicker();
     await openImagesDemo(tester, picker, thread: 'Image preview');
@@ -120,7 +120,17 @@ void main() {
     expect(find.byType(LightMessageSender), findsNothing);
     await tester
         .ensureVisible(find.byTooltip('Open image received-sample.png'));
+    final activateImage = tester
+        .widget<GestureDetector>(find
+            .descendant(
+                of: find.byTooltip('Open image received-sample.png'),
+                matching: find.byType(GestureDetector))
+            .first)
+        .onTap!;
     await tester.tap(find.byTooltip('Open image received-sample.png'));
+    // Deliver the browser's duplicate activation before a frame. The VM's route
+    // hit-test barrier would otherwise swallow a second pointer tap immediately.
+    activateImage();
     await tester.pumpAndSettle();
     expect(find.text('received-sample.png'), findsOneWidget);
     expect(find.byType(InteractiveViewer), findsOneWidget);
@@ -134,6 +144,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(viewer.transformationController!.value.getMaxScaleOnAxis(),
         closeTo(1, 0.01));
+    await tester.tap(find.byTooltip('Close image'));
+    await tester.pumpAndSettle();
+    expect(find.text('Image preview'), findsOneWidget);
+    expect(find.byType(InteractiveViewer), findsNothing);
+    await tester.tap(find.byTooltip('Open image received-sample.png'));
+    await tester.pumpAndSettle();
+    expect(find.byType(InteractiveViewer), findsOneWidget);
     await tester.tap(find.byTooltip('Close image'));
     await tester.pumpAndSettle();
     expect(find.text('Image preview'), findsOneWidget);

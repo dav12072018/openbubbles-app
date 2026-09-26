@@ -146,6 +146,7 @@ class _DemoHomeState extends State<_DemoHome> {
   bool pickingImages = false;
   String? imageError;
   int imageSession = 0;
+  bool imageViewerOpen = false;
   bool voiceStarting = false;
   bool recording = false;
   bool voiceStopping = false;
@@ -279,10 +280,18 @@ class _DemoHomeState extends State<_DemoHome> {
     }
   }
 
-  void openImage(DemoImage image) {
+  Future<void> openImage(DemoImage image) async {
+    if (imageViewerOpen) return;
+    imageViewerOpen = true;
     FocusScope.of(context).unfocus();
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => DemoImageViewer(image: image)));
+    final route = MaterialPageRoute<void>(
+        builder: (_) => DemoImageViewer(image: image));
+    try {
+      await Navigator.of(context).push(route);
+      await route.completed;
+    } finally {
+      imageViewerOpen = false;
+    }
   }
 
   Widget imageDraftStrip() => SizedBox(
